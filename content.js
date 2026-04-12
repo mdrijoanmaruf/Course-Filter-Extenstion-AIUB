@@ -13,6 +13,23 @@
   let searchTimeout = null;
   let originalTablePanel = null;
 
+  // ── Routine Generator State ──────────────────────────────────
+  let selectedSections = [];
+  let clashMap = {};
+
+  const ROUTINE_COLORS = [
+    { bg: '#e3f2fd', border: '#1565c0', text: '#0d47a1' },
+    { bg: '#f3e5f5', border: '#7b1fa2', text: '#4a148c' },
+    { bg: '#e8f5e9', border: '#2e7d32', text: '#1b5e20' },
+    { bg: '#fff3e0', border: '#ef6c00', text: '#e65100' },
+    { bg: '#fce4ec', border: '#c62828', text: '#b71c1c' },
+    { bg: '#e0f7fa', border: '#00838f', text: '#006064' },
+    { bg: '#e8eaf6', border: '#283593', text: '#1a237e' },
+    { bg: '#e0f2f1', border: '#00695c', text: '#004d40' },
+  ];
+  const courseColorCache = {};
+  let courseColorIndex = 0;
+
   // Static day list — always show these regardless of data
   const ALL_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
 
@@ -420,6 +437,164 @@
     return hours + minutes / 60;
   }
 
+  // ── Time conversion: "08:30 AM" → minutes since midnight (510) ──
+  function timeToMinutes(timeStr) {
+    if (!timeStr) return null;
+    const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!match) return null;
+    let hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const period = match[3].toUpperCase();
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  }
+
+  // ── Check if two time slots overlap (strict < so back-to-back is OK) ──
+  function timeSlotsOverlap(slot1, slot2) {
+    if (slot1.day !== slot2.day) return false;
+    const start1 = timeToMinutes(slot1.startTime);
+    const end1   = timeToMinutes(slot1.endTime);
+    const start2 = timeToMinutes(slot2.startTime);
+    const end2   = timeToMinutes(slot2.endTime);
+    if (start1 === null || end1 === null || start2 === null || end2 === null) return false;
+    return (start1 < end2 && start2 < end1);
+  }
+
+  // ── Check a course against all selected sections for clashes ──
+  function checkTimeClash(newCourse) {
+    for (const selected of selectedSections) {
+      for (const newSlot of newCourse.timeSlots) {
+        for (const selSlot of selected.timeSlots) {
+          if (timeSlotsOverlap(newSlot, selSlot)) {
+            return {
+              hasClash: true,
+              clashWith: selected.fullTitle,
+              details: newSlot.day + ' ' + newSlot.startTime + ' \u2013 ' + newSlot.endTime
+                     + ' overlaps with '
+                     + selSlot.day + ' ' + selSlot.startTime + ' \u2013 ' + selSlot.endTime
+            };
+          }
+        }
+      }
+    }
+    return { hasClash: false };
+  }
+
+  // ── Recompute clash map for all courses ──
+  function recomputeClashMap() {
+    clashMap = {};
+    allCourses.forEach(function (course) {
+      if (selectedSections.some(function (s) { return s.classId === course.classId; })) return;
+      const clash = checkTimeClash(course);
+      if (clash.hasClash) {
+        clashMap[course.classId] = clash;
+      }
+    });
+  }
+
+  // ── Build a time signature for grouping equivalent sections ──
+  function getTimeSignature(course) {
+    if (!course.timeSlots || course.timeSlots.length === 0) return '';
+    return course.timeSlots
+      .map(function (ts) { return ts.day + '|' + ts.startTime + '|' + ts.endTime + '|' + ts.classType; })
+      .sort()
+      .join(';;');
+  }
+
+  // ── Find and store linked sections (same course, same schedule) ──
+  function autoSelectLinkedSections(course) {
+    const timeSignature = getTimeSignature(course);
+    const linkedSections = allCourses.filter(function (c) {
+      return c.title === course.title &&
+             c.classId !== course.classId &&
+             getTimeSignature(c) === timeSignature;
+    });
+    course._linkedSections = linkedSections.map(function (s) {
+      return { section: s.section, classId: s.classId, capacity: s.capacity, count: s.count };
+    });
+  }
+
+  // ── Get color for a course title ──
+  function getCourseColor(courseTitle) {
+    if (!courseColorCache[courseTitle]) {
+      courseColorCache[courseTitle] = ROUTINE_COLORS[courseColorIndex % ROUTINE_COLORS.length];
+      courseColorIndex++;
+    }
+    return courseColorCache[courseTitle];
+  }
+
+  // ── Handle selecting a section ──
+  function handleSelectSection(classId) {
+    const course = allCourses.find(function (c) { return c.classId === classId; });
+    if (!course) return;
+    if (selectedSections.some(function (s) { return s.classId === classId; })) return;
+    if (selectedSections.some(function (s) { return s.title === course.title; })) return;
+    const clash = checkTimeClash(course);
+    if (clash.hasClash) return;
+
+    selectedSections.push(course);
+    autoSelectLinkedSections(course);
+    recomputeClashMap();
+    saveSelectedSections();
+    renderFilteredResults();
+    renderSelectedCoursesPanel();
+  }
+
+  // ── Handle removing a section ──
+  function handleRemoveSection(classId) {
+    const course = selectedSections.find(function (s) { return s.classId === classId; });
+    if (!course) return;
+    const courseTitle = course.title;
+    selectedSections = selectedSections.filter(function (s) { return s.title !== courseTitle; });
+    recomputeClashMap();
+    saveSelectedSections();
+    renderFilteredResults();
+    renderSelectedCoursesPanel();
+  }
+
+  // ── Clear all selections ──
+  function clearAllSelections() {
+    selectedSections = [];
+    clashMap = {};
+    localStorage.removeItem('aiub_selectedSections');
+    localStorage.removeItem('aiub_selectedTimestamp');
+    renderFilteredResults();
+    renderSelectedCoursesPanel();
+  }
+
+  // ── Save to localStorage ──
+  function saveSelectedSections() {
+    try {
+      localStorage.setItem('aiub_selectedSections', JSON.stringify(selectedSections));
+      localStorage.setItem('aiub_selectedTimestamp', new Date().toISOString());
+    } catch (e) {
+      console.warn('[AIUB Routine] Failed to save:', e);
+    }
+  }
+
+  // ── Load from localStorage ──
+  function loadSelectedSections() {
+    try {
+      const saved = localStorage.getItem('aiub_selectedSections');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          selectedSections = parsed.filter(function (sec) {
+            return allCourses.some(function (c) { return c.classId === sec.classId; });
+          });
+          if (selectedSections.length > 0) {
+            selectedSections.forEach(function (sec) { autoSelectLinkedSections(sec); });
+            recomputeClashMap();
+            renderSelectedCoursesPanel();
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[AIUB Routine] Failed to load:', e);
+    }
+  }
+
   // ── Render filtered results table ────────────────────────────
   function renderFilteredResults() {
     const container = document.getElementById('aiub-results-container');
@@ -464,11 +639,12 @@
                 <th style="width:60px;">Count</th>
                 <th style="width:80px;">Available</th>
                 <th>Schedule</th>
+                <th style="width:90px;text-align:center;">Action</th>
               </tr>
             </thead>
             <tbody>
               ${pageData.length === 0
-                ? '<tr><td colspan="7" class="text-center text-muted" style="padding:20px;">No courses match your filters.</td></tr>'
+                ? '<tr><td colspan="8" class="text-center text-muted" style="padding:20px;">No courses match your filters.</td></tr>'
                 : pageData.map(c => renderCourseRow(c)).join('')}
             </tbody>
           </table>
@@ -503,6 +679,27 @@
       '</span>'
     ).join('');
 
+    // ── Select button state ──
+    let actionHtml = '';
+    const isSelected = selectedSections.some(function (sel) { return sel.classId === course.classId; });
+    const sameCoursePicked = selectedSections.some(function (sel) {
+      return sel.title === course.title && sel.classId !== course.classId;
+    });
+    const clashInfo = clashMap[course.classId];
+
+    if (isSelected) {
+      actionHtml = '<button class="aiub-select-btn aiub-sel-done" disabled>&#10003; Selected</button>';
+    } else if (clashInfo && clashInfo.hasClash) {
+      actionHtml = '<button class="aiub-select-btn aiub-sel-clash" disabled title="Clashes with '
+                 + clashInfo.clashWith + ' \u2014 ' + clashInfo.details
+                 + '">&#10007; Clash</button>';
+    } else if (sameCoursePicked) {
+      actionHtml = '<button class="aiub-select-btn aiub-sel-added" disabled>Course Added</button>';
+    } else {
+      actionHtml = '<button class="aiub-select-btn aiub-sel-pick" data-classid="'
+                 + course.classId + '">&#43; Select</button>';
+    }
+
     return `
       <tr>
         <td style="font-weight:600;color:#2c3e50;">${course.classId}</td>
@@ -512,6 +709,7 @@
         <td class="text-center">${course.count}</td>
         <td class="text-center">${seatsHtml}</td>
         <td>${scheduleHtml}</td>
+        <td class="text-center">${actionHtml}</td>
       </tr>
     `;
   }
@@ -570,6 +768,304 @@
         renderFilteredResults();
       });
     }
+
+    // ── Select button listeners ──
+    document.querySelectorAll('.aiub-sel-pick').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        handleSelectSection(btn.dataset.classid);
+      });
+    });
+  }
+
+  // ── Selected Courses Panel ────────────────────────────────────
+  function renderSelectedCoursesPanel() {
+    let panel = document.getElementById('aiub-selected-panel');
+
+    if (selectedSections.length === 0) {
+      if (panel) panel.remove();
+      const routineContainer = document.getElementById('aiub-routine-container');
+      if (routineContainer) routineContainer.style.display = 'none';
+      return;
+    }
+
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'aiub-selected-panel';
+      panel.className = 'panel panel-primary';
+      const resultsContainer = document.getElementById('aiub-results-container');
+      if (resultsContainer) {
+        resultsContainer.insertAdjacentElement('afterend', panel);
+      } else {
+        const mainContent = document.getElementById('main-content') || document.body;
+        mainContent.appendChild(panel);
+      }
+    }
+
+    const cards = selectedSections.map(function (sec) {
+      const color = getCourseColor(sec.title);
+      const available = sec.capacity - sec.count;
+      const scheduleLines = sec.timeSlots.map(function (ts) {
+        return ts.classType + ': ' + ts.day + ' ' + ts.startTime + '\u2013' + ts.endTime;
+      });
+      let linkedText = '';
+      if (sec._linkedSections && sec._linkedSections.length > 0) {
+        linkedText = 'Also: ' + sec._linkedSections.map(function (ls) {
+          return 'Sec ' + ls.section + ' (' + (ls.capacity - ls.count) + ')';
+        }).join(', ');
+      }
+
+      return '<div class="aiub-selected-card" style="border-left:4px solid ' + color.border + ';">'
+        + '<div class="aiub-sc-title">' + sec.fullTitle + '</div>'
+        + '<div class="aiub-sc-schedule">'
+        + scheduleLines.map(function (l) { return '<span>' + l + '</span>'; }).join('')
+        + '</div>'
+        + '<div class="aiub-sc-info">'
+        + '<span class="aiub-sc-status">' + sec.status + '</span>'
+        + '<span class="aiub-sc-seats">' + available + ' seats</span>'
+        + (linkedText ? '<span class="aiub-sc-linked">' + linkedText + '</span>' : '')
+        + '</div>'
+        + '<button class="aiub-sc-remove" data-classid="' + sec.classId + '" title="Remove ' + sec.fullTitle + '">&#10005;</button>'
+        + '</div>';
+    }).join('');
+
+    panel.innerHTML = '<div class="panel-heading">'
+      + '<h5 class="panel-title">&#128203;&nbsp;Selected Courses '
+      + '<span class="aiub-badge-total">' + selectedSections.length + ' course(s)</span>'
+      + '</h5>'
+      + '<div class="aiub-header-actions">'
+      + '<button id="aiub-view-routine-btn" type="button">&#128197; View Routine</button>'
+      + '<button id="aiub-download-btn" type="button">&#11015; Download</button>'
+      + '<button id="aiub-clear-all-btn" type="button">&#10005; Clear All</button>'
+      + '</div>'
+      + '</div>'
+      + '<div class="panel-body">'
+      + '<div class="aiub-selected-cards">' + cards + '</div>'
+      + '</div>';
+
+    attachSelectedPanelListeners();
+  }
+
+  function attachSelectedPanelListeners() {
+    document.querySelectorAll('.aiub-sc-remove').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        handleRemoveSection(btn.dataset.classid);
+      });
+    });
+
+    var viewBtn = document.getElementById('aiub-view-routine-btn');
+    if (viewBtn) viewBtn.addEventListener('click', renderRoutineContainer);
+
+    var downloadBtn = document.getElementById('aiub-download-btn');
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadRoutine);
+
+    var clearBtn = document.getElementById('aiub-clear-all-btn');
+    if (clearBtn) clearBtn.addEventListener('click', clearAllSelections);
+  }
+
+  // ── Routine View (Weekly Grid) ───────────────────────────────
+  function renderRoutineView() {
+    if (selectedSections.length === 0) {
+      return '<div class="aiub-routine-empty">'
+        + '<p>No courses selected yet.</p>'
+        + '<p>Use the filter above and click "Select" to build your routine.</p>'
+        + '</div>';
+    }
+
+    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+    var HOUR_PX = 80;
+
+    // Find time bounds
+    var minMin = Infinity, maxMin = -Infinity;
+    selectedSections.forEach(function (sec) {
+      sec.timeSlots.forEach(function (ts) {
+        var st = timeToMinutes(ts.startTime);
+        var en = timeToMinutes(ts.endTime);
+        if (st !== null && st < minMin) minMin = st;
+        if (en !== null && en > maxMin) maxMin = en;
+      });
+    });
+
+    var startHour = Math.floor(minMin / 60);
+    var endHour = Math.ceil(maxMin / 60);
+    var totalMinutes = (endHour - startHour) * 60;
+    var bodyHeight = (endHour - startHour) * HOUR_PX;
+
+    // Time labels
+    var timeLabelsHtml = '';
+    for (var h = startHour; h <= endHour; h++) {
+      var label = h < 12 ? h + ':00 AM'
+                : h === 12 ? '12:00 PM'
+                : (h - 12) + ':00 PM';
+      var topPx = (h - startHour) * HOUR_PX;
+      timeLabelsHtml += '<div class="aiub-routine-time-label" style="top:' + topPx + 'px;">' + label + '</div>';
+    }
+
+    // Build events
+    var events = [];
+    selectedSections.forEach(function (sec) {
+      var color = getCourseColor(sec.title);
+      sec.timeSlots.forEach(function (ts) {
+        var st = timeToMinutes(ts.startTime);
+        var en = timeToMinutes(ts.endTime);
+        if (st === null || en === null) return;
+
+        var topPx = ((st - startHour * 60) / 60) * HOUR_PX;
+        var heightPx = ((en - st) / 60) * HOUR_PX;
+
+        var sectionLabel = 'Sec: ' + sec.section;
+        if (sec._linkedSections && sec._linkedSections.length > 0) {
+          var linked = sec._linkedSections.map(function (ls) {
+            return ls.section + ' (' + (ls.capacity - ls.count) + ')';
+          }).join(', ');
+          sectionLabel += ' (' + (sec.capacity - sec.count) + '), ' + linked;
+        }
+
+        events.push({
+          day: ts.day, topPx: topPx, heightPx: heightPx,
+          title: sec.title, section: sectionLabel,
+          time: ts.startTime + ' \u2013 ' + ts.endTime,
+          room: ts.room, classType: ts.classType, color: color
+        });
+      });
+    });
+
+    // Build HTML
+    var html = '<div class="aiub-routine-grid" id="aiub-routine-grid">';
+
+    // Header
+    html += '<div class="aiub-routine-header">';
+    html += '<div class="aiub-routine-time-col">Time</div>';
+    days.forEach(function (day) {
+      html += '<div class="aiub-routine-day-col">' + day + '</div>';
+    });
+    html += '</div>';
+
+    // Body
+    html += '<div class="aiub-routine-body" style="height:' + bodyHeight + 'px;">';
+
+    // Time column
+    html += '<div class="aiub-routine-time-col">' + timeLabelsHtml + '</div>';
+
+    // Day columns
+    days.forEach(function (day) {
+      html += '<div class="aiub-routine-day-col aiub-routine-day-body">';
+
+      // Grid lines
+      for (var gh = startHour; gh <= endHour; gh++) {
+        var gTop = (gh - startHour) * HOUR_PX;
+        html += '<div class="aiub-routine-gridline" style="top:' + gTop + 'px;"></div>';
+      }
+
+      // Events
+      events.filter(function (e) { return e.day === day; }).forEach(function (ev) {
+        html += '<div class="aiub-routine-event" style="'
+          + 'top:' + ev.topPx + 'px;'
+          + 'height:' + ev.heightPx + 'px;'
+          + 'background:' + ev.color.bg + ';'
+          + 'border-left:4px solid ' + ev.color.border + ';'
+          + 'color:' + ev.color.text + ';">'
+          + '<div class="aiub-routine-ev-title">' + ev.title + '</div>'
+          + '<div class="aiub-routine-ev-section">' + ev.section + '</div>'
+          + '<div class="aiub-routine-ev-time">' + ev.time + '</div>'
+          + '<div class="aiub-routine-ev-room">' + ev.room + '</div>'
+          + '</div>';
+      });
+
+      html += '</div>';
+    });
+
+    html += '</div>'; // body
+    html += '</div>'; // grid
+
+    return html;
+  }
+
+  function renderRoutineContainer() {
+    var container = document.getElementById('aiub-routine-container');
+
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'aiub-routine-container';
+      var selectedPanel = document.getElementById('aiub-selected-panel');
+      if (selectedPanel) {
+        selectedPanel.insertAdjacentElement('afterend', container);
+      }
+    }
+
+    container.style.display = 'block';
+    var routineHtml = renderRoutineView();
+
+    container.innerHTML = '<div class="panel panel-primary aiub-routine-panel">'
+      + '<div class="panel-heading">'
+      + '<h5 class="panel-title">&#128197;&nbsp;My Routine</h5>'
+      + '<div class="aiub-header-actions">'
+      + '<button id="aiub-routine-download-btn" type="button">&#11015; Download as Image</button>'
+      + '<button id="aiub-routine-close-btn" type="button">&#10005; Close</button>'
+      + '</div>'
+      + '</div>'
+      + '<div class="panel-body" style="padding:16px;overflow-x:auto;">'
+      + routineHtml
+      + '</div>'
+      + '</div>';
+
+    var dlBtn = document.getElementById('aiub-routine-download-btn');
+    if (dlBtn) dlBtn.addEventListener('click', downloadRoutine);
+
+    var closeBtn = document.getElementById('aiub-routine-close-btn');
+    if (closeBtn) closeBtn.addEventListener('click', function () {
+      container.style.display = 'none';
+    });
+
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Download Routine as Image ────────────────────────────────
+  function loadHtml2Canvas() {
+    return new Promise(function (resolve, reject) {
+      if (window.html2canvas) { resolve(); return; }
+      var script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  async function downloadRoutine() {
+    var grid = document.getElementById('aiub-routine-grid');
+    if (!grid) {
+      renderRoutineContainer();
+      grid = document.getElementById('aiub-routine-grid');
+      if (!grid) return;
+    }
+
+    try {
+      await loadHtml2Canvas();
+
+      var clone = grid.cloneNode(true);
+      clone.style.width = '1200px';
+      clone.style.position = 'absolute';
+      clone.style.left = '-9999px';
+      clone.style.top = '0';
+      document.body.appendChild(clone);
+
+      var canvas = await html2canvas(clone, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        logging: false
+      });
+
+      document.body.removeChild(clone);
+
+      var link = document.createElement('a');
+      link.download = 'My_Routine_AIUB.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error('[AIUB Routine] Download failed:', err);
+      alert('Failed to download routine image. Please try again.');
+    }
   }
 
   // ── Reset filters ────────────────────────────────────────────
@@ -616,6 +1112,10 @@
 
       const statuses = getUniqueStatuses(allCourses);
       injectFilterPanel(statuses);
+
+      // Restore saved selections from localStorage
+      loadSelectedSections();
+
       console.log('[AIUB Filter] Filter panel injected');
     } catch (err) {
       console.error('[AIUB Filter] Init failed:', err);

@@ -396,6 +396,278 @@
   color: #9aabb8;
 }
 
+/* ── Select Buttons ──────────────────────────────────────────── */
+.aiub-select-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  line-height: 1.5;
+}
+.aiub-sel-pick {
+  background: linear-gradient(135deg, #1565c0, #1976d2);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(21,101,192,0.25);
+}
+.aiub-sel-pick:hover {
+  background: linear-gradient(135deg, #0d47a1, #1565c0);
+  box-shadow: 0 3px 10px rgba(13,71,161,0.35);
+  transform: translateY(-1px);
+}
+.aiub-sel-done {
+  background: #e8f5e9;
+  color: #2e7d32;
+  cursor: default;
+}
+.aiub-sel-clash {
+  background: #ffebee;
+  color: #c62828;
+  cursor: not-allowed;
+}
+.aiub-sel-added {
+  background: #eceff1;
+  color: #78909c;
+  cursor: default;
+}
+
+/* ── Selected Courses Panel ─────────────────────────────────── */
+#aiub-selected-panel {
+  margin-bottom: 22px;
+  border: none !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(13,71,161,0.13), 0 1px 4px rgba(0,0,0,0.07) !important;
+}
+#aiub-selected-panel .panel-heading {
+  background: linear-gradient(135deg, #1b5e20 0%, #388e3c 100%) !important;
+  color: #fff;
+  border: none !important;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+#aiub-selected-panel .panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+#aiub-selected-panel .panel-body {
+  background: #fff;
+  padding: 16px 20px;
+}
+.aiub-selected-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  padding: 4px;
+}
+.aiub-selected-card {
+  background: #f8fbff;
+  border: 1.5px solid #d4e3f5;
+  border-radius: 10px;
+  padding: 12px 14px;
+  position: relative;
+  transition: box-shadow 0.18s;
+}
+.aiub-selected-card:hover {
+  box-shadow: 0 3px 12px rgba(13,71,161,0.12);
+}
+.aiub-sc-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #1a3a6e;
+  margin-bottom: 6px;
+  padding-right: 24px;
+}
+.aiub-sc-schedule {
+  font-size: 11px;
+  color: #546e7a;
+  margin-bottom: 6px;
+}
+.aiub-sc-schedule span { display: block; }
+.aiub-sc-info {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.aiub-sc-status, .aiub-sc-seats, .aiub-sc-linked {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.aiub-sc-status { background: #e8f5e9; color: #2e7d32; }
+.aiub-sc-seats  { background: #e3f2fd; color: #1565c0; }
+.aiub-sc-linked { background: #f3e5f5; color: #7b1fa2; }
+.aiub-sc-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #c62828;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.15s;
+  line-height: 1;
+}
+.aiub-sc-remove:hover { background: #ffebee; }
+
+/* Action buttons in selected/routine panels */
+#aiub-view-routine-btn,
+#aiub-download-btn,
+#aiub-clear-all-btn,
+#aiub-routine-download-btn,
+#aiub-routine-close-btn {
+  background: rgba(255,255,255,0.14) !important;
+  border: 1px solid rgba(255,255,255,0.40) !important;
+  color: #fff !important;
+  border-radius: 7px;
+  padding: 5px 15px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  line-height: 1.6;
+}
+#aiub-view-routine-btn:hover,
+#aiub-download-btn:hover,
+#aiub-clear-all-btn:hover,
+#aiub-routine-download-btn:hover,
+#aiub-routine-close-btn:hover {
+  background: rgba(255,255,255,0.26) !important;
+}
+
+/* ── Routine Panel ──────────────────────────────────────────── */
+#aiub-routine-container { margin-bottom: 22px; }
+.aiub-routine-panel {
+  border: none !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(13,71,161,0.13), 0 1px 4px rgba(0,0,0,0.07) !important;
+}
+.aiub-routine-panel .panel-heading {
+  background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%) !important;
+  color: #fff;
+  border: none !important;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.aiub-routine-panel .panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+/* ── Routine Grid ───────────────────────────────────────────── */
+.aiub-routine-grid {
+  border: 1.5px solid #d4e3f5;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  min-width: 600px;
+}
+.aiub-routine-header {
+  display: flex;
+  background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%);
+  color: #fff;
+}
+.aiub-routine-header .aiub-routine-time-col {
+  width: 80px;
+  min-width: 80px;
+  padding: 10px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-right: 1px solid rgba(255,255,255,0.15);
+  text-align: center;
+}
+.aiub-routine-header .aiub-routine-day-col {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.15);
+  letter-spacing: 0.3px;
+}
+.aiub-routine-header .aiub-routine-day-col:last-child { border-right: none; }
+.aiub-routine-body {
+  display: flex;
+  position: relative;
+}
+.aiub-routine-body .aiub-routine-time-col {
+  width: 80px;
+  min-width: 80px;
+  border-right: 1.5px solid #e8eef6;
+  position: relative;
+}
+.aiub-routine-time-label {
+  position: absolute;
+  font-size: 10px;
+  color: #90a4ae;
+  font-weight: 600;
+  right: 8px;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+.aiub-routine-day-body {
+  flex: 1;
+  position: relative;
+  border-right: 1px solid #f0f4f9;
+}
+.aiub-routine-day-body:last-child { border-right: none; }
+.aiub-routine-gridline {
+  position: absolute;
+  left: 0; right: 0;
+  border-top: 1px dashed #edf2f9;
+}
+.aiub-routine-event {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 6px;
+  padding: 6px 8px;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.4;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  z-index: 1;
+}
+.aiub-routine-ev-title {
+  font-weight: 700;
+  font-size: 11px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.aiub-routine-ev-section { font-size: 10px; opacity: 0.85; }
+.aiub-routine-ev-time { font-size: 10px; font-weight: 600; margin-top: 2px; }
+.aiub-routine-ev-room { font-size: 9px; opacity: 0.7; margin-top: 1px; }
+.aiub-routine-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #90a4ae;
+  font-size: 14px;
+}
+.aiub-routine-empty p { margin: 4px 0; }
+
 /* Responsive */
 @media (max-width: 768px) {
   #aiub-filter-panel .panel-heading,
