@@ -8,7 +8,7 @@
   let allCourses = [];
   let filteredCourses = [];
   let currentPage = 1;
-  let rowsPerPage = 10;
+  let rowsPerPage = 25;
   const SEARCH_DEBOUNCE = 300;
   let searchTimeout = null;
   let originalTablePanel = null;
@@ -42,30 +42,40 @@
     const courses = [];
     rows.forEach(row => {
       const cells = row.querySelectorAll('td');
-      if (cells.length < 6) return;
+      if (cells.length < 3) return; // need at least classId, title, status
 
       const classId = cells[0].textContent.trim();
       if (!classId || !/^\d+$/.test(classId)) return; // Skip non-data rows
 
-      const fullTitle = cells[1].textContent.trim();
-      const status = cells[2].textContent.trim();
-      const capacity = parseInt(cells[3].textContent.trim(), 10) || 0;
-      const count = parseInt(cells[4].textContent.trim(), 10) || 0;
+      const fullTitle = cells.length > 1 ? cells[1].textContent.trim() : '';
+      const status = cells.length > 2 ? cells[2].textContent.trim() : '';
+      const capacity = cells.length > 3 ? (parseInt(cells[3].textContent.trim(), 10) || 0) : 0;
+      const count = cells.length > 4 ? (parseInt(cells[4].textContent.trim(), 10) || 0) : 0;
 
       const timeSlots = [];
-      const nestedRows = cells[5].querySelectorAll('table tbody tr');
-      nestedRows.forEach(timeRow => {
-        const timeCells = timeRow.querySelectorAll('td');
-        if (timeCells.length >= 5) {
-          timeSlots.push({
-            classType: timeCells[0].textContent.trim(),
-            day: timeCells[1].textContent.trim(),
-            startTime: timeCells[2].textContent.trim(),
-            endTime: timeCells[3].textContent.trim(),
-            room: timeCells[4].textContent.trim()
-          });
-        }
-      });
+      if (cells.length > 5) {
+        const nestedRows = cells[5].querySelectorAll('table tbody tr');
+        nestedRows.forEach(timeRow => {
+          const timeCells = timeRow.querySelectorAll('td');
+          if (timeCells.length >= 5) {
+            timeSlots.push({
+              classType: timeCells[0].textContent.trim(),
+              day: timeCells[1].textContent.trim(),
+              startTime: timeCells[2].textContent.trim(),
+              endTime: timeCells[3].textContent.trim(),
+              room: timeCells[4].textContent.trim()
+            });
+          } else if (timeCells.length >= 3) {
+            timeSlots.push({
+              classType: timeCells[0] ? timeCells[0].textContent.trim() : '',
+              day: timeCells[1] ? timeCells[1].textContent.trim() : '',
+              startTime: timeCells[2] ? timeCells[2].textContent.trim() : '',
+              endTime: timeCells.length > 3 ? timeCells[3].textContent.trim() : '',
+              room: timeCells.length > 4 ? timeCells[4].textContent.trim() : ''
+            });
+          }
+        });
+      }
 
       const sectionMatch = fullTitle.match(/\[([^\]]+)\]$/);
       const section = sectionMatch ? sectionMatch[1] : '';
@@ -150,12 +160,21 @@
     return [...new Set(courses.map(c => c.status))].filter(Boolean).sort();
   }
 
-  // ── Parse HH:MM (24h) time input value to decimal hours ────────
-  function parseTimeInputToHours(val) {
-    if (!val) return NaN;
-    const parts = val.split(':');
-    if (parts.length < 2) return NaN;
-    return parseInt(parts[0], 10) + parseInt(parts[1], 10) / 60;
+  // ── Time select option builders (8 AM – 6 PM, :00/:10/…/:50) ──
+  function buildHourOptions(placeholder) {
+    let s = '<option value="">' + placeholder + '</option>';
+    for (let h = 8; h <= 18; h++) {
+      const label = h < 12 ? h + ' AM' : h === 12 ? '12 PM' : (h - 12) + ' PM';
+      s += '<option value="' + h + '">' + label + '</option>';
+    }
+    return s;
+  }
+  function buildMinOptions() {
+    let s = '<option value="0">:00</option>';
+    for (let m = 10; m <= 50; m += 10) {
+      s += '<option value="' + m + '">' + ':' + (m < 10 ? '0' : '') + m + '</option>';
+    }
+    return s;
   }
 
   // ── Show loading indicator while data is being fetched ────────
@@ -202,63 +221,72 @@
 
     filterPanel.innerHTML = `
       <div class="panel-heading">
-        <h5 class="panel-title">
-          &#9889;&nbsp;Advanced Course Filter
-          <span id="aiub-total-count" class="aiub-badge-total"></span>
-        </h5>
+        <div class="aiub-header-left">
+          <h5 class="panel-title">&#9889;&nbsp;Advanced Course Filter
+            <span id="aiub-total-count" class="aiub-badge-total"></span>
+          </h5>
+        </div>
         <div class="aiub-header-actions">
           <span id="aiub-filter-count" class="aiub-badge-results" style="display:none;"></span>
-          <button id="aiub-reset-btn" type="button">&#8635; Reset</button>
+          <button id="aiub-reset-btn" type="button">&#8635;&nbsp;Reset</button>
         </div>
       </div>
       <div class="panel-body">
-        <div class="row">
-          <div class="col-md-5 col-sm-12" style="margin-bottom:12px;">
+
+        <div class="aiub-filter-row">
+          <div class="aiub-filter-col aiub-col-search">
             <span class="aiub-label">Search Course</span>
-            <div class="aiub-search-wrap">
-              <input type="text" id="aiub-search" class="form-control" placeholder="Course name or Class ID&hellip;">
-            </div>
+            <input type="text" id="aiub-search" class="form-control" placeholder="Course name or Class ID&hellip;">
           </div>
-          <div class="col-md-3 col-sm-6" style="margin-bottom:12px;">
+          <div class="aiub-filter-col aiub-col-status-row">
             <span class="aiub-label">Status</span>
-            <select id="aiub-status" class="form-control">
-              <option value="">All Statuses</option>
-              ${statuses.map(s => `<option value="${s}">${s}</option>`).join('')}
-            </select>
-          </div>
-          <div class="col-md-4 col-sm-6" style="margin-bottom:12px;">
-            <span class="aiub-label">Seat Availability</span>
-            <select id="aiub-seats" class="form-control">
-              <option value="">All</option>
-              <option value="available">Available (any seats)</option>
-              <option value="full">Full (0 seats)</option>
-              <option value="5">5+ seats</option>
-              <option value="10">10+ seats</option>
-              <option value="15">15+ seats</option>
-              <option value="20">20+ seats</option>
-              <option value="25">25+ seats</option>
-              <option value="30">30+ seats</option>
-              <option value="35">35+ seats</option>
-            </select>
+            <div class="aiub-status-wrap">
+              ${statuses.map(function(s) {
+                const k = s.toLowerCase();
+                const c = k.indexOf('open') !== -1 ? 'aiub-sb-green'
+                  : k.indexOf('fresh') !== -1 ? 'aiub-sb-blue'
+                  : k.indexOf('close') !== -1 || k.indexOf('cancel') !== -1 ? 'aiub-sb-red'
+                  : k.indexOf('reserv') !== -1 ? 'aiub-sb-purple'
+                  : 'aiub-sb-grey';
+                const isOpen = k.indexOf('open') !== -1;
+                const activeClass = isOpen ? ' active' : '';
+                return '<button type="button" class="aiub-status-btn ' + c + activeClass + '" data-status="' + s + '">' + s + '</button>';
+              }).join('')}
+            </div>
           </div>
         </div>
+
         <hr class="aiub-filter-divider">
-        <div class="row">
-          <div class="col-md-4 col-sm-12" style="margin-bottom:12px;">
-            <span class="aiub-label">Class Start Time &mdash; From / To</span>
-            <div class="aiub-time-range">
-              <input type="time" id="aiub-time-from" class="form-control" title="From time">
-              <span class="aiub-time-sep">&rarr;</span>
-              <input type="time" id="aiub-time-to" class="form-control" title="To time">
-            </div>
-          </div>
-          <div class="col-md-8 col-sm-12">
+
+        <div class="aiub-filter-row">
+          <div class="aiub-filter-col aiub-col-days">
             <span class="aiub-label">Day of Week</span>
             <div class="aiub-days-wrap">
               ${ALL_DAYS.map(d => `<button type="button" class="aiub-day-btn" data-day="${d}">${d}</button>`).join('')}
             </div>
           </div>
+          <div class="aiub-filter-col aiub-col-time">
+            <span class="aiub-label">Class Start Time</span>
+            <div class="aiub-time-box">
+              <div class="aiub-time-block">
+                <span class="aiub-time-lbl">From</span>
+                <div class="aiub-time-pair">
+                  <select id="aiub-from-h" class="form-control"><option value="">Hr</option><option value="8" selected>8 AM</option><option value="9">9 AM</option><option value="10">10 AM</option><option value="11">11 AM</option><option value="12">12 PM</option><option value="13">1 PM</option><option value="14">2 PM</option><option value="15">3 PM</option><option value="16">4 PM</option><option value="17">5 PM</option><option value="18">6 PM</option></select>
+                  <select id="aiub-from-m" class="form-control"><option value="0" selected>:00</option><option value="10">:10</option><option value="20">:20</option><option value="30">:30</option><option value="40">:40</option><option value="50">:50</option></select>
+                </div>
+              </div>
+              <div class="aiub-time-arr">&rarr;</div>
+              <div class="aiub-time-block">
+                <span class="aiub-time-lbl">To</span>
+                <div class="aiub-time-pair">
+                  <select id="aiub-to-h" class="form-control"><option value="">Hr</option><option value="8">8 AM</option><option value="9">9 AM</option><option value="10">10 AM</option><option value="11">11 AM</option><option value="12">12 PM</option><option value="13">1 PM</option><option value="14">2 PM</option><option value="15">3 PM</option><option value="16">4 PM</option><option value="17">5 PM</option><option value="18" selected>6 PM</option></select>
+                  <select id="aiub-to-m" class="form-control"><option value="0" selected>:00</option><option value="10">:10</option><option value="20">:20</option><option value="30">:30</option><option value="40">:40</option><option value="50">:50</option></select>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
       </div>
     `;
 
@@ -294,12 +322,15 @@
       searchTimeout = setTimeout(applyFilters, SEARCH_DEBOUNCE);
     });
 
-    document.getElementById('aiub-status').addEventListener('change', applyFilters);
-    document.getElementById('aiub-seats').addEventListener('change', applyFilters);
-    document.getElementById('aiub-time-from').addEventListener('change', applyFilters);
-    document.getElementById('aiub-time-from').addEventListener('input', applyFilters);
-    document.getElementById('aiub-time-to').addEventListener('change', applyFilters);
-    document.getElementById('aiub-time-to').addEventListener('input', applyFilters);
+    document.querySelectorAll('.aiub-status-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
+        applyFilters();
+      });
+    });
+    ['aiub-from-h', 'aiub-from-m', 'aiub-to-h', 'aiub-to-m'].forEach(id => {
+      document.getElementById(id).addEventListener('change', applyFilters);
+    });
 
     document.querySelectorAll('.aiub-day-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -314,17 +345,20 @@
   // ── Core filter logic ────────────────────────────────────────
   function applyFilters() {
     const searchVal = document.getElementById('aiub-search').value.trim().toLowerCase();
-    const statusVal = document.getElementById('aiub-status').value;
-    const seatsVal = document.getElementById('aiub-seats').value;
-    const timeFrom = parseTimeInputToHours(document.getElementById('aiub-time-from').value);
-    const timeTo = parseTimeInputToHours(document.getElementById('aiub-time-to').value);
+    const selectedStatuses = [...document.querySelectorAll('.aiub-status-btn.active')].map(b => b.dataset.status);
+    const fromH = parseInt(document.getElementById('aiub-from-h').value, 10);
+    const fromM = parseInt(document.getElementById('aiub-from-m').value, 10);
+    const toH   = parseInt(document.getElementById('aiub-to-h').value, 10);
+    const toM   = parseInt(document.getElementById('aiub-to-m').value, 10);
+    const timeFrom = isNaN(fromH) ? NaN : fromH + (isNaN(fromM) ? 0 : fromM) / 60;
+    const timeTo   = isNaN(toH)   ? NaN : toH   + (isNaN(toM)   ? 0 : toM)   / 60;
 
     const selectedDays = [];
     document.querySelectorAll('.aiub-day-btn.active').forEach(btn => {
       selectedDays.push(btn.dataset.day);
     });
 
-    const hasFilters = searchVal || statusVal || seatsVal ||
+    const hasFilters = searchVal || selectedStatuses.length > 0 ||
       !isNaN(timeFrom) || !isNaN(timeTo) || selectedDays.length > 0;
 
     if (!hasFilters) {
@@ -342,30 +376,20 @@
       }
 
       // 2. Status filter
-      if (statusVal && course.status !== statusVal) return false;
+      if (selectedStatuses.length > 0 && !selectedStatuses.includes(course.status)) return false;
 
-      // 3. Seat availability filter
-      if (seatsVal) {
-        const available = course.capacity - course.count;
-        if (seatsVal === 'available' && available <= 0) return false;
-        if (seatsVal === 'full' && available > 0) return false;
-        // Numeric threshold: "5", "10", "15", etc.
-        const threshold = parseInt(seatsVal, 10);
-        if (!isNaN(threshold) && available < threshold) return false;
-      }
-
-      // 4. Day filter
-      if (selectedDays.length > 0) {
+      // 3. Day filter (skip if course has no schedule data)
+      if (selectedDays.length > 0 && course.timeSlots.length > 0) {
         const courseDays = course.timeSlots.map(ts => ts.day);
         const hasMatchingDay = selectedDays.some(d => courseDays.includes(d));
         if (!hasMatchingDay) return false;
       }
 
-      // 5. Time range filter (matches course start time)
-      if (!isNaN(timeFrom) || !isNaN(timeTo)) {
+      // 4. Time range filter (skip if course has no schedule data)
+      if ((!isNaN(timeFrom) || !isNaN(timeTo)) && course.timeSlots.length > 0) {
         const hasMatchingTime = course.timeSlots.some(ts => {
           const startHour = parseTimeToHours(ts.startTime);
-          if (startHour === null) return false;
+          if (startHour === null) return true; // can't parse → don't exclude
           if (!isNaN(timeFrom) && startHour < timeFrom) return false;
           if (!isNaN(timeTo) && startHour > timeTo) return false;
           return true;
@@ -551,16 +575,23 @@
   // ── Reset filters ────────────────────────────────────────────
   function resetFilters() {
     document.getElementById('aiub-search').value = '';
-    document.getElementById('aiub-status').value = '';
-    document.getElementById('aiub-seats').value = '';
-    document.getElementById('aiub-time-from').value = '';
-    document.getElementById('aiub-time-to').value = '';
+    document.querySelectorAll('.aiub-status-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.aiub-status-btn').forEach(btn => {
+      if (btn.dataset.status.toLowerCase().indexOf('open') !== -1) {
+        btn.classList.add('active');
+      }
+    });
+    document.getElementById('aiub-from-h').value = '8';
+    document.getElementById('aiub-from-m').value = '0';
+    document.getElementById('aiub-to-h').value = '18';
+    document.getElementById('aiub-to-m').value = '0';
     document.querySelectorAll('.aiub-day-btn.active').forEach(btn => btn.classList.remove('active'));
 
+    // Hide filtered results and show original portal table
     const container = document.getElementById('aiub-results-container');
-    const originalPanel = originalTablePanel;
     container.style.display = 'none';
-    if (originalPanel) originalPanel.style.display = '';
+    container.innerHTML = '';
+    if (originalTablePanel) originalTablePanel.style.display = '';
 
     const badge = document.getElementById('aiub-filter-count');
     badge.textContent = '';
