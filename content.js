@@ -223,7 +223,6 @@
           <div class="col-md-5 col-sm-12" style="margin-bottom:12px;">
             <span class="aiub-label">Search Course</span>
             <div class="aiub-search-wrap">
-              <span class="aiub-search-icon glyphicon glyphicon-search"></span>
               <input type="text" id="aiub-search" class="form-control" placeholder="Course name or Class ID&hellip;">
             </div>
           </div>
