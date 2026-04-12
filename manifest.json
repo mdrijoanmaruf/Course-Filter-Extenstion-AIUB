@@ -23,6 +23,11 @@
       "run_at": "document_idle"
     },
     {
+      "matches": ["https://portal.aiub.edu/Student/Curriculum*"],
+      "js": ["Academic/MkCurriculumn.js"],
+      "run_at": "document_idle"
+    },
+    {
       "matches": ["https://portal.aiub.edu/Student/Adrop/DropApplication*"],
       "js": ["Academic/DropApplication.js"],
       "run_at": "document_idle"

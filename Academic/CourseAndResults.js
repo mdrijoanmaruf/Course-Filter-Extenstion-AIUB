@@ -92,6 +92,7 @@
 
   /* ── CSS ──────────────────────────────────────────────────────── */
   const CSS = `<style id="car-style">
+.car-root-panel { border: none !important; box-shadow: none !important; }
 .car-root-panel > .panel-heading { display: none !important; }
 .car-root-panel > .panel-body { background: transparent !important; border: none !important; box-shadow: none !important; padding: 16px 4px !important; }
 
@@ -126,17 +127,17 @@
 .car-final-lbl { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* Term cards - Midterm */
-.car-term-card { background: #fff; border: 1.5px solid #e5e7eb; border-radius: 12px; margin-bottom: 14px; overflow: hidden; }
-.car-term-card.car-midterm { border-color: #bfdbfe; background: #f0f9ff; }
-.car-term-card.car-finalterm { border-color: #f0d9ff; background: #faf5ff; }
+.car-term-card { background: transparent; border: none; border-radius: 0; margin-bottom: 14px; overflow: visible; }
+.car-term-card.car-midterm { border: none; background: transparent; }
+.car-term-card.car-finalterm { border: none; background: transparent; }
 
 .car-term-head {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 18px;
-  cursor: pointer; user-select: none;
+  padding: 14px 0;
+  cursor: pointer; user-select: none; background: transparent;
 }
-.car-term-card.car-midterm .car-term-head { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); }
-.car-term-card.car-finalterm .car-term-head { background: linear-gradient(135deg, #fce7f3 0%, #e9d5ff 100%); }
+.car-term-card.car-midterm .car-term-head { background: transparent; }
+.car-term-card.car-finalterm .car-term-head { background: transparent; }
 .car-term-head:hover { filter: brightness(0.98); }
 .car-term-name { font-size: 14px; font-weight: 600; color: #111827; }
 .car-term-meta { font-size: 11px; color: #6b7280; margin-top: 2px; }
@@ -147,19 +148,19 @@
 .car-term-card.car-finalterm .car-term-grade { color: #be185d; }
 .car-term-chevron { font-size: 10px; color: #9ca3af; transition: transform 0.2s; }
 .car-term-card.car-open .car-term-chevron { transform: rotate(180deg); }
-.car-term-body { display: none; padding: 8px 2px; }
+.car-term-body { display: none; padding: 0; }
 .car-term-card.car-open .car-term-body { display: block; }
 
-/* Section (Theory/Lab) cards - flattened */
-.car-section-card { margin: 6px 8px; padding: 0; border: none; border-radius: 0; overflow: visible; }
+/* Section (Theory/Lab) cards - flat */
+.car-section-card { margin: 0; padding: 0; border: none; border-radius: 0; overflow: visible; }
 .car-section-head {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 12px; background: transparent; cursor: pointer; user-select: none;
-  border-left: 3px solid #9ca3af; border-radius: 0;
+  padding: 8px 0; background: transparent; cursor: pointer; user-select: none;
+  border: none;
 }
-.car-term-card.car-midterm .car-section-head { border-left-color: #3b82f6; background: #eff6ff; }
-.car-term-card.car-finalterm .car-section-head { border-left-color: #ec4899; background: #fdf2f8; }
-.car-section-head:hover { filter: brightness(0.98); }
+.car-term-card.car-midterm .car-section-head { border: none; background: transparent; }
+.car-term-card.car-finalterm .car-section-head { border: none; background: transparent; }
+.car-section-head:hover { opacity: 0.8; }
 .car-section-name { font-size: 13px; font-weight: 600; color: #374151; }
 .car-section-meta { font-size: 11px; color: #9ca3af; margin-top: 2px; }
 .car-section-right { display: flex; align-items: center; gap: 8px; }
@@ -172,11 +173,11 @@
 .car-section-card.car-open .car-section-body { display: block; }
 
 /* Sub-item rows */
-.car-sub-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border-top: 1px solid rgba(148, 163, 184, 0.2); }
+.car-sub-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border: none; }
 .car-sub-row:first-child { border-top: none; }
-.car-sub-row:hover { background: rgba(255, 255, 255, 0.6); }
-.car-term-card.car-midterm .car-sub-row:hover { background: rgba(59, 130, 246, 0.05); }
-.car-term-card.car-finalterm .car-sub-row:hover { background: rgba(236, 72, 153, 0.05); }
+.car-sub-row:hover { opacity: 0.85; }
+.car-term-card.car-midterm .car-sub-row:hover { opacity: 0.9; }
+.car-term-card.car-finalterm .car-sub-row:hover { opacity: 0.9; }
 .car-sub-name { font-size: 12px; font-weight: 500; color: #374151; }
 .car-sub-meta { font-size: 11px; color: #9ca3af; margin-top: 1px; }
 .car-sub-score { font-size: 13px; font-weight: 600; white-space: nowrap; padding-left: 8px; }
