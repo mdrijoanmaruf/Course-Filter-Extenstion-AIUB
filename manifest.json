@@ -18,6 +18,11 @@
       "world": "MAIN"
     },
     {
+      "matches": ["https://portal.aiub.edu/Student/Course?*"],
+      "js": ["Academic/CourseAndResults.js"],
+      "run_at": "document_idle"
+    },
+    {
       "matches": ["https://portal.aiub.edu/Student/Adrop/DropApplication*"],
       "js": ["Academic/DropApplication.js"],
       "run_at": "document_idle"
