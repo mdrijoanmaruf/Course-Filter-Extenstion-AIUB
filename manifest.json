@@ -14,7 +14,8 @@
       "matches": ["https://portal.aiub.edu/Student/Section/Offered*"],
       "js": ["content.js"],
       "css": ["styles.css"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "world": "MAIN"
     }
   ],
   "action": {
