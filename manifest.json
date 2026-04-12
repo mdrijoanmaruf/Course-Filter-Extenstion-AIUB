@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "AIUB Course Filter",
+  "version": "1.0",
+  "description": "Advanced filtering for AIUB Portal Offered Courses — filter by status, seat availability, day, and time slot",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://portal.aiub.edu/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://portal.aiub.edu/Student/Section/Offered*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "aiub.jpg",
+      "48": "aiub.jpg",
+      "128": "aiub.jpg"
+    }
+  },
+  "icons": {
+    "16": "aiub.jpg",
+    "48": "aiub.jpg",
+    "128": "aiub.jpg"
+  }
+}

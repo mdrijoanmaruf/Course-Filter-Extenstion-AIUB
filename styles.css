@@ -1,0 +1,71 @@
+/* Filter Panel */
+#aiub-filter-panel {
+  margin-bottom: 15px;
+}
+
+#aiub-filter-panel .panel-heading {
+  background: #2c3e50;
+  color: white;
+  border: none;
+}
+
+#aiub-filter-panel .panel-body {
+  background: #f8f9fa;
+}
+
+#aiub-filter-panel label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 3px;
+  color: #555;
+}
+
+#aiub-filter-panel .checkbox-inline {
+  font-weight: normal;
+  margin-right: 15px;
+}
+
+/* Results Table */
+#aiub-results-container .table th {
+  background: #2c3e50;
+  color: white;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+#aiub-results-container .table td {
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+#aiub-results-container .text-success {
+  color: #27ae60 !important;
+}
+
+#aiub-results-container .text-danger {
+  color: #e74c3c !important;
+}
+
+#aiub-results-container .pagination {
+  margin: 5px 0;
+}
+
+#aiub-results-container .pagination > li > a {
+  color: #2c3e50;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+#aiub-results-container .pagination > .active > a {
+  background: #2c3e50;
+  border-color: #2c3e50;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #aiub-filter-panel .col-md-4,
+  #aiub-filter-panel .col-md-3,
+  #aiub-filter-panel .col-md-2 {
+    margin-bottom: 8px;
+  }
+}
