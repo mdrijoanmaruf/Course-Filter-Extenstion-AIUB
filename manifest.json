@@ -28,6 +28,11 @@
       "run_at": "document_idle"
     },
     {
+      "matches": ["https://portal.aiub.edu/Student/Accounts*"],
+      "js": ["Academic/Financials.js"],
+      "run_at": "document_idle"
+    },
+    {
       "matches": ["https://portal.aiub.edu/Student/Adrop/DropApplication*"],
       "js": ["Academic/DropApplication.js"],
       "run_at": "document_idle"
