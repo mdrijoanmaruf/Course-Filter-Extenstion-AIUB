@@ -181,7 +181,6 @@
         border-color: #f1f5f9 !important;
       }
     `;
-    document.head.appendChild(s);
   }
 
   function insertHeader() {

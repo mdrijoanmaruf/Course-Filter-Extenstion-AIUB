@@ -113,7 +113,7 @@
     const table = panelBody.querySelector('table.table-details');
     if (!table) return;
 
-    document.head.insertAdjacentHTML('beforeend', CSS);
+
 
     const panel = panelBody.closest('.panel');
     if (panel) panel.classList.add('fin-root-panel');

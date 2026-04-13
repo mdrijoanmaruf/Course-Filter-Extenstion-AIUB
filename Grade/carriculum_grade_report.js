@@ -22,186 +22,7 @@
       .replace(/"/g, '&quot;');
   }
 
-  function injectCSS() {
-    if (document.getElementById('aiub-cgr-css')) return;
-    const s = document.createElement('style');
-    s.id = 'aiub-cgr-css';
-    s.textContent = `
-      /* SCOPED panel reset — only the .panel ancestor of .grade-report.
-         Preserves the portal sidebar and all other panels. */
-      .cgr-root-panel > .panel-heading { display: none !important; }
-      .cgr-root-panel { box-shadow: none !important; border: none !important;
-        background: transparent !important; margin-bottom: 0 !important; }
-      .cgr-root-panel > .panel-body { padding: 0 !important; background: transparent !important; }
-
-      .grade-report {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
-        font-size: 13px;
-        color: #1e293b;
-        background: transparent;
-        border: none;
-        border-radius: 0;
-        padding: 16px 4px;
-        box-shadow: none;
-      }
-
-      .cgr-top {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 16px;
-        padding-bottom: 14px;
-        border-bottom: 2px solid #f1f5f9;
-      }
-      .cgr-title { font-size: 16px; font-weight: 700; color: #0f172a; letter-spacing: -.3px; margin: 0; padding: 0; }
-      .cgr-title span { color: #2563eb; }
-      .cgr-print {
-        font-size: 11px; font-weight: 600; color: #475569; text-decoration: none;
-        border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 13px;
-        background: #f8fafc; transition: background .15s, color .15s, border-color .15s;
-      }
-      .cgr-print:hover { background: #e0e7ff; color: #1d4ed8; border-color: #a5b4fc; text-decoration: none; }
-
-      .cgr-info {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        margin-bottom: 20px;
-      }
-      .cgr-info-cell {
-        padding: 10px 14px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        transition: box-shadow .15s, border-color .15s;
-        cursor: default;
-      }
-      .cgr-info-cell:hover { box-shadow: 0 2px 8px rgba(37,99,235,.08); border-color: #bfdbfe; }
-      .cgr-info-lbl {
-        font-size: 10px; text-transform: uppercase; letter-spacing: .8px;
-        color: #94a3b8; margin-bottom: 4px; font-weight: 600;
-      }
-      .cgr-info-val { font-size: 13px; color: #0f172a; font-weight: 500; }
-      .cgr-info-val.cgpa { font-size: 26px; font-weight: 800; color: #059669; line-height: 1.1; }
-
-      .cgr-sh {
-        display: flex; align-items: center; gap: 8px;
-        font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .9px;
-        color: #1e40af; margin: 20px 0 10px; padding: 7px 12px;
-        background: #eff6ff; border-radius: 7px; border-left: 3px solid #2563eb;
-      }
-      .cgr-sh.el { color: #166534; background: #f0fdf4; border-left-color: #16a34a; }
-      .cgr-sh-badge {
-        margin-left: auto; display: inline-flex; align-items: center; justify-content: center;
-        background: #dbeafe; color: #1d4ed8; border-radius: 20px;
-        font-size: 10px; font-weight: 700; padding: 1px 8px; min-width: 22px;
-      }
-
-      .cgr-sl {
-        display: inline-flex; align-items: center;
-        font-size: 11px; font-weight: 700; color: #334155;
-        text-transform: uppercase; letter-spacing: .5px;
-        background: #f1f5f9; border: 1px solid #e2e8f0;
-        border-radius: 5px; padding: 4px 11px; margin: 14px 0 7px;
-      }
-
-      .cgr-tbl-wrap {
-        border: 1px solid #e2e8f0; border-radius: 8px;
-        overflow: hidden; margin-bottom: 6px;
-      }
-      .cgr-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-      .cgr-tbl th {
-        background: #f8fafc; padding: 8px 12px;
-        font-size: 10px; font-weight: 700; text-transform: uppercase;
-        letter-spacing: .6px; color: #64748b;
-        border-bottom: 1px solid #e2e8f0; text-align: left;
-      }
-      .cgr-tbl th.tc { text-align: center; }
-      .cgr-tbl td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-      .cgr-tbl td.tc { text-align: center; }
-      .cgr-tbl tbody tr:last-child td { border-bottom: none; }
-      .cgr-tbl tbody tr:nth-child(even) td { background: #fafbfd; }
-      .cgr-tbl tbody tr:hover td { background: #eff6ff !important; }
-
-      tr.cgr-ong > td { background: #f0f9ff !important; }
-      tr.cgr-wdn > td { background: #fff5f5 !important; }
-      tr.cgr-nd  > td { background: #fafafa; }
-      tr.cgr-nd .cgr-cn { color: #94a3b8; }
-
-      .cgr-code {
-        font-family: 'Consolas', 'Cascadia Code', 'Courier New', monospace;
-        font-size: 12px; font-weight: 600; white-space: nowrap; color: #1e3a8a;
-      }
-      tr.cgr-nd  .cgr-code { color: #cbd5e1; }
-      tr.cgr-ong .cgr-code { color: #2563eb; }
-      tr.cgr-wdn .cgr-code { color: #dc2626; }
-
-      .cgr-sem-ln { font-size: 11px; color: #64748b; line-height: 1.8; }
-
-      .cgr-gp {
-        display: inline-block; padding: 2px 10px; border-radius: 20px;
-        font-size: 11px; font-weight: 700; color: #059669;
-        white-space: nowrap; letter-spacing: .3px;
-      }
-      .cgr-gp-nd { font-size: 12px; color: #cbd5e1; }
-
-      .cgr-na-section {
-        background: #fffdf5; border: 1px solid #fde68a;
-        border-radius: 10px; padding: 14px 16px 16px; margin-bottom: 20px;
-      }
-      .cgr-na-section .cgr-sh {
-        margin: 0 0 12px; color: #92400e; background: #fef3c7; border-left-color: #f59e0b;
-      }
-      .cgr-na-section .cgr-sh-badge { background: #fde68a; color: #92400e; }
-      .cgr-na-all-done {
-        text-align: center; padding: 14px; color: #059669;
-        font-size: 13px; font-weight: 600;
-        background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;
-      }
-
-      .cgr-tabs-nav { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
-      .cgr-tab-btn {
-        display: inline-flex; align-items: center; gap: 6px;
-        padding: 5px 12px; border: 1px solid #e2e8f0; border-radius: 6px;
-        background: #fff; font-size: 11px; font-weight: 600; color: #64748b;
-        cursor: pointer; transition: background .15s, color .15s, border-color .15s;
-        outline: none; font-family: inherit;
-      }
-      .cgr-tab-btn:hover { background: #f1f5f9; color: #0f172a; border-color: #94a3b8; }
-      .cgr-tab-btn.active {
-        background: #1d4ed8; color: #fff; border-color: #1d4ed8;
-        box-shadow: 0 1px 4px rgba(29,78,216,.3);
-      }
-      .cgr-tab-cnt {
-        background: #e2e8f0; color: #475569;
-        border-radius: 20px; padding: 0 6px;
-        font-size: 10px; font-weight: 700; line-height: 1.6;
-      }
-      .cgr-tab-btn.active .cgr-tab-cnt { background: rgba(255,255,255,.25); color: #fff; }
-
-      .cgr-tab-panel { display: none; }
-      .cgr-tab-panel.active { display: block; }
-
-      .cgr-legend {
-        display: flex; flex-wrap: wrap; gap: 14px;
-        margin-top: 18px; padding-top: 12px;
-        border-top: 1px solid #f1f5f9;
-        font-size: 11px; color: #64748b;
-      }
-      .cgr-legend span { display: flex; align-items: center; gap: 6px; }
-      .cgr-legend-dot {
-        display: inline-block; width: 9px; height: 9px;
-        border-radius: 50%; flex-shrink: 0;
-      }
-
-      @media (max-width: 768px) {
-        .cgr-info { grid-template-columns: repeat(2, 1fr); }
-        .cgr-tbl th, .cgr-tbl td { padding: 6px 8px; font-size: 12px; }
-        .grade-report { padding: 14px; }
-      }
-    `;
-    document.head.appendChild(s);
-  }
+  function injectCSS() { }
 
   function parseGrades(text) {
     const out = [];
@@ -222,7 +43,7 @@
   }
 
   function gradePill(grades) {
-    if (!grades.length) return `<span class="cgr-gp-nd">—</span>`;
+    if (!grades.length) return `<span class="cgr-gp-nd">â€”</span>`;
     const last = grades[grades.length - 1];
     const bg   = GRADE_BG[last.grade] || '#90a4ae';
     const lbl  = last.grade === '-' ? 'Ongoing' : last.grade;
@@ -230,7 +51,7 @@
   }
 
   function semLines(grades) {
-    if (!grades.length) return `<span class="cgr-gp-nd">—</span>`;
+    if (!grades.length) return `<span class="cgr-gp-nd">â€”</span>`;
     return grades.map(g => `<div class="cgr-sem-ln">${esc(g.sem)}</div>`).join('');
   }
 
@@ -248,7 +69,7 @@
     const cells = items.map(({ k, v }) =>
       `<div class="cgr-info-cell">
         <div class="cgr-info-lbl">${esc(k)}</div>
-        <div class="cgr-info-val${k === 'Cgpa' ? ' cgpa' : ''}">${esc(v) || '—'}</div>
+        <div class="cgr-info-val${k === 'Cgpa' ? ' cgpa' : ''}">${esc(v) || 'â€”'}</div>
       </div>`
     ).join('');
     const safeHref = printHref && /^[/?#]/.test(printHref) ? printHref : '#';

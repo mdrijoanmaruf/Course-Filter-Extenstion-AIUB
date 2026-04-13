@@ -42,36 +42,43 @@
     {
       "matches": ["https://portal.aiub.edu/Student/Course?*"],
       "js": ["Academic/CourseAndResults.js"],
+      "css": ["Academic/CourseAndResults.css"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://portal.aiub.edu/Student/Curriculum*"],
       "js": ["Academic/MkCurriculumn.js"],
+      "css": ["Academic/MkCurriculumn.css"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://portal.aiub.edu/Student/Accounts*"],
       "js": ["Academic/Financials.js"],
+      "css": ["Academic/Financials.css"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://portal.aiub.edu/Student/Adrop/DropApplication*"],
       "js": ["Academic/DropApplication.js"],
+      "css": ["Academic/DropApplication.css"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://portal.aiub.edu/Student/Registration?*"],
       "js": ["Academic/Registration.js"],
+      "css": ["Academic/Registration.css"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://portal.aiub.edu/Student/GradeReport/ByCurriculum*"],
       "js": ["Grade/carriculum_grade_report.js"],
+      "css": ["Grade/carriculum_grade_report.css"],
       "run_at": "document_idle"
     },
     {
       "matches": ["https://portal.aiub.edu/Student/GradeReport/BySemester*"],
       "js": ["Grade/carriculum_grade_semester.js"],
+      "css": ["Grade/carriculum_grade_semester.css"],
       "run_at": "document_idle"
     }
   ],

@@ -160,7 +160,6 @@
         .reg-fee-panel { position: static; }
       }
     `;
-    document.head.appendChild(s);
   }
 
   function parseCreditSummary(tbl) {

@@ -366,7 +366,7 @@
 
     const termsHTML = terms.map((t, i) => termCardHTML(t, i)).join('');
 
-    panelBody.innerHTML = CSS + filterBar + courseCard + termsHTML;
+    panelBody.innerHTML = filterBar + courseCard + termsHTML;
 
     const panel = panelBody.closest('.panel');
     if (panel) panel.classList.add('car-root-panel');
