@@ -24,12 +24,15 @@
 }
 .cgr-title { font-size: 16px; font-weight: 700; color: #0f172a; letter-spacing: -.3px; margin: 0; padding: 0; }
 .cgr-title span { color: #2563eb; }
-.cgr-print {
+.cgr-actions { display: flex; align-items: center; gap: 8px; }
+.cgr-action-link {
   font-size: 11px; font-weight: 600; color: #475569; text-decoration: none;
   border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 13px;
   background: #f8fafc; transition: background .15s, color .15s, border-color .15s;
 }
-.cgr-print:hover { background: #e0e7ff; color: #1d4ed8; border-color: #a5b4fc; text-decoration: none; }
+.cgr-action-link:hover { background: #e0e7ff; color: #1d4ed8; border-color: #a5b4fc; text-decoration: none; }
+.cgr-graph { border-color: #bae6fd; background: #f0f9ff; color: #0369a1; }
+.cgr-graph:hover { border-color: #7dd3fc; background: #e0f2fe; color: #075985; }
 
 .cgr-info {
   display: grid;

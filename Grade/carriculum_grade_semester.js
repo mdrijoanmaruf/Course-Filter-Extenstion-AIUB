@@ -22,6 +22,14 @@
       .replace(/"/g, '&quot;');
   }
 
+  function getGraphPageUrl() {
+    try {
+      return chrome.runtime.getURL('Grade/Graphs.html');
+    } catch (e) {
+      return '';
+    }
+  }
+
   function gpaColor(v) {
     const n = parseFloat(v);
     if (isNaN(n) || n === 0) return '#64748b';
@@ -32,6 +40,83 @@
   }
 
   function injectCSS() { }
+
+  function normalizeInfoKey(v) {
+    return String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
+  function getInfoValue(items, keys) {
+    const wanted = new Set(keys.map(normalizeInfoKey));
+    for (const item of items) {
+      if (wanted.has(normalizeInfoKey(item.k))) return String(item.v || '').trim();
+    }
+    return '';
+  }
+
+  function extractNumber(text) {
+    const m = String(text || '').match(/-?\d+(?:\.\d+)?/);
+    return m ? parseFloat(m[0]) : 0;
+  }
+
+  function saveGraphData(mutator) {
+    if (!chrome.storage || !chrome.storage.local) return;
+    chrome.storage.local.get({ aiubGraphData: {} }, function (res) {
+      const next = Object.assign({}, res.aiubGraphData || {});
+      mutator(next);
+      next.updatedAt = new Date().toISOString();
+      chrome.storage.local.set({ aiubGraphData: next });
+    });
+  }
+
+  function persistSemesterGraphData(infoItems, semesters) {
+    const allCourses = [];
+    semesters.forEach(s => allCourses.push(...s.courses));
+
+    const passFail = {
+      passed: allCourses.filter(c => c.state === 'done').length,
+      ongoing: allCourses.filter(c => c.state === 'ong').length,
+      dropped: allCourses.filter(c => c.state === 'wdn').length,
+      failed: allCourses.filter(c => c.state === 'fail').length,
+    };
+
+    const semesterGpaTrend = semesters
+      .map(sem => ({
+        label: sem.label,
+        gpa: extractNumber(sem.summary && sem.summary.gpa),
+      }))
+      .filter(p => p.gpa > 0);
+
+    const cgpaTrend = semesters
+      .map(sem => ({
+        label: sem.label,
+        cgpa: extractNumber(sem.summary && sem.summary.cgpa),
+      }))
+      .filter(p => p.cgpa > 0);
+
+    const creditBySemester = semesters
+      .map(sem => ({
+        label: sem.label,
+        credits: extractNumber(sem.summary && sem.summary.ecr),
+      }))
+      .filter(p => p.credits > 0);
+
+    const payload = {
+      studentName: getInfoValue(infoItems, ['Name', 'Student Name']),
+      studentId: getInfoValue(infoItems, ['Id', 'Student Id']),
+      program: getInfoValue(infoItems, ['Program', 'Department']),
+      latestCgpa: extractNumber(getInfoValue(infoItems, ['Cgpa', 'CGPA'])),
+      totalCourses: allCourses.length,
+      passFail,
+      semesterGpaTrend,
+      cgpaTrend,
+      creditBySemester,
+      capturedAt: new Date().toISOString(),
+    };
+
+    saveGraphData(store => {
+      store.semester = payload;
+    });
+  }
 
   function parseInfo(tbl) {
     const items = [];
@@ -135,10 +220,19 @@
       </div>`
     ).join('');
     const safeHref = printHref && /^[/?#]/.test(printHref) ? printHref : '#';
+    const graphHref = getGraphPageUrl();
+    const actions = [];
+    if (printHref) {
+      actions.push(`<a class="sgr-action-link sgr-print" href="${esc(safeHref)}">&#128438; Print</a>`);
+    }
+    if (graphHref) {
+      actions.push(`<a class="sgr-action-link sgr-graph" href="${esc(graphHref)}">&#128202; Graph</a>`);
+    }
+
     return `
       <div class="sgr-top">
         <h2 class="sgr-title">Semester <span>Grade Report</span></h2>
-        ${printHref ? `<a class="sgr-print" href="${esc(safeHref)}">&#128438; Print</a>` : ''}
+        <div class="sgr-actions">${actions.join('')}</div>
       </div>
       <div class="sgr-info">${cells}</div>`;
   }
@@ -229,6 +323,7 @@
 
     const infoItems = parseInfo(tables[0]);
     const semesters = parseSemesters(tables[1]);
+    persistSemesterGraphData(infoItems, semesters);
 
     let html = infoHTML(infoItems, printHref);
     semesters.forEach(sem => { html += semesterHTML(sem); });

@@ -27,6 +27,14 @@
       .replace(/"/g, '&quot;');
   }
 
+  function getGraphPageUrl() {
+    try {
+      return chrome.runtime.getURL('Grade/Graphs.html');
+    } catch (e) {
+      return '';
+    }
+  }
+
   function injectCSS() { }
 
   function norm(v) {
@@ -202,6 +210,89 @@
     return items;
   }
 
+  function normalizeInfoKey(v) {
+    return String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
+  function getInfoValue(items, keys) {
+    const wanted = new Set(keys.map(normalizeInfoKey));
+    for (const item of items) {
+      if (wanted.has(normalizeInfoKey(item.k))) return String(item.v || '').trim();
+    }
+    return '';
+  }
+
+  function extractNumber(text) {
+    const m = String(text || '').match(/-?\d+(?:\.\d+)?/);
+    return m ? parseFloat(m[0]) : 0;
+  }
+
+  function saveGraphData(mutator) {
+    if (!chrome.storage || !chrome.storage.local) return;
+    chrome.storage.local.get({ aiubGraphData: {} }, function (res) {
+      const next = Object.assign({}, res.aiubGraphData || {});
+      mutator(next);
+      next.updatedAt = new Date().toISOString();
+      chrome.storage.local.set({ aiubGraphData: next });
+    });
+  }
+
+  function persistCurriculumGraphData(infoItems, semSections, electiveRows) {
+    const allRows = [];
+    semSections.forEach(sec => allRows.push(...sec.rows));
+    allRows.push(...electiveRows);
+
+    const stateCounts = {
+      completed: allRows.filter(r => r.state === 'done').length,
+      ongoing: allRows.filter(r => r.state === 'ong').length,
+      withdrawn: allRows.filter(r => r.state === 'wdn').length,
+      notAttempted: allRows.filter(r => r.state === 'nd').length,
+    };
+
+    const gradeDistribution = {};
+    allRows.forEach(r => {
+      const grade = r.grades.length ? r.grades[r.grades.length - 1].grade : '-';
+      const key = !r.grades.length ? 'N/A' : (grade === '-' ? 'Ongoing' : grade);
+      gradeDistribution[key] = (gradeDistribution[key] || 0) + 1;
+    });
+
+    const notAttemptedRows = allRows.filter(r => r.state === 'nd');
+    const locked = notAttemptedRows.filter(r => r.locked).length;
+    const unlocked = Math.max(notAttemptedRows.length - locked, 0);
+
+    const semesterProgress = semSections.map(sec => {
+      const total = sec.rows.length;
+      const attempted = sec.rows.filter(r => r.state !== 'nd').length;
+      const completed = sec.rows.filter(r => r.state === 'done').length;
+      return {
+        label: sec.label || 'Semester',
+        total,
+        attempted,
+        completed,
+      };
+    });
+
+    const payload = {
+      studentName: getInfoValue(infoItems, ['Name', 'Student Name']),
+      studentId: getInfoValue(infoItems, ['Id', 'Student Id']),
+      program: getInfoValue(infoItems, ['Program', 'Department']),
+      cgpa: extractNumber(getInfoValue(infoItems, ['Cgpa', 'CGPA'])),
+      totalCourses: allRows.length,
+      stateCounts,
+      gradeDistribution,
+      prerequisite: {
+        locked,
+        unlocked,
+      },
+      semesterProgress,
+      capturedAt: new Date().toISOString(),
+    };
+
+    saveGraphData(store => {
+      store.curriculum = payload;
+    });
+  }
+
   function infoHTML(items, printHref) {
     const cells = items.map(({ k, v }) =>
       `<div class="cgr-info-cell">
@@ -210,10 +301,19 @@
       </div>`
     ).join('');
     const safeHref = printHref && /^[/?#]/.test(printHref) ? printHref : '#';
+    const graphHref = getGraphPageUrl();
+    const actions = [];
+    if (printHref) {
+      actions.push(`<a class="cgr-action-link cgr-print" href="${esc(safeHref)}">&#128438; Print</a>`);
+    }
+    if (graphHref) {
+      actions.push(`<a class="cgr-action-link cgr-graph" href="${esc(graphHref)}">&#128202; Graph</a>`);
+    }
+
     return `
       <div class="cgr-top">
         <h2 class="cgr-title">Curriculum <span>Grade Report</span></h2>
-        ${printHref ? `<a class="cgr-print" href="${esc(safeHref)}">&#128438; Print</a>` : ''}
+        <div class="cgr-actions">${actions.join('')}</div>
       </div>
       <div class="cgr-info">${cells}</div>`;
   }
@@ -410,6 +510,7 @@
     }
 
     addLockInfoToNotAttempted(semSections, electiveRows);
+    persistCurriculumGraphData(infoItems || [], semSections, electiveRows);
 
     let html = '';
     html += infoHTML(infoItems || [], printHref);

@@ -28,11 +28,51 @@
     document.head.appendChild(link);
   }
 
+  function getGraphPageUrl() {
+    try {
+      return chrome.runtime.getURL('Grade/Graphs.html');
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function injectGraphNavItem(sidebar) {
+    if (!sidebar || sidebar.querySelector('.aiub-graph-nav-item')) return;
+
+    const graphUrl = getGraphPageUrl();
+    if (!graphUrl) return;
+
+    const gradeLinks = Array.from(sidebar.querySelectorAll(
+      '.list-group-item[href*="/Student/GradeReport/ByCurriculum"], .list-group-item[href*="/Student/GradeReport/BySemester"]'
+    ));
+
+    const link = document.createElement('a');
+    link.className = 'list-group-item aiub-graph-nav-item';
+    link.href = graphUrl;
+    link.innerHTML = '<span class="glyphicon glyphicon-stats" aria-hidden="true"></span> Graph';
+
+    if (gradeLinks.length) {
+      const last = gradeLinks[gradeLinks.length - 1];
+      const parent = last.parentElement;
+      if (!parent) return;
+      if (last.nextSibling) {
+        parent.insertBefore(link, last.nextSibling);
+      } else {
+        parent.appendChild(link);
+      }
+      return;
+    }
+
+    const fallback = sidebar.querySelector('.panel-collapse > div');
+    if (fallback) fallback.appendChild(link);
+  }
+
   function enhance() {
     const sidebar = document.getElementById('navigation-bar');
     if (!sidebar) return;
 
     loadCSS();
+    injectGraphNavItem(sidebar);
 
     const name = getStudentName();
     const idEl = document.querySelector('.navbar-text .navbar-link small');

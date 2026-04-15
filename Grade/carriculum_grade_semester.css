@@ -14,8 +14,11 @@
 .sgr-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 2px solid #f1f5f9; }
 .sgr-title { font-size: 16px; font-weight: 700; color: #0f172a; letter-spacing: -.3px; margin: 0; padding: 0; }
 .sgr-title span { color: #2563eb; }
-.sgr-print { font-size: 11px; font-weight: 600; color: #475569; text-decoration: none; border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 13px; background: #f8fafc; transition: background .15s, color .15s, border-color .15s; }
-.sgr-print:hover { background: #e0e7ff; color: #1d4ed8; border-color: #a5b4fc; text-decoration: none; }
+.sgr-actions { display: flex; align-items: center; gap: 8px; }
+.sgr-action-link { font-size: 11px; font-weight: 600; color: #475569; text-decoration: none; border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 13px; background: #f8fafc; transition: background .15s, color .15s, border-color .15s; }
+.sgr-action-link:hover { background: #e0e7ff; color: #1d4ed8; border-color: #a5b4fc; text-decoration: none; }
+.sgr-graph { border-color: #bae6fd; background: #f0f9ff; color: #0369a1; }
+.sgr-graph:hover { border-color: #7dd3fc; background: #e0f2fe; color: #075985; }
 
 .sgr-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
 .sgr-info-cell { padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; cursor: default; transition: box-shadow .15s, border-color .15s; }
