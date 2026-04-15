@@ -97,7 +97,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["Home/Registration.css", "Home/Intro.css", "Shared/Sidebar.css", "Shared/contentBridge.js", "Academic/CSE.json", "Grade/Graphs.html", "Grade/Graphs.css", "Grade/Graphs.js"],
+      "resources": ["Home/Registration.css", "Home/Intro.css", "Shared/Sidebar.css", "Shared/contentBridge.js", "Academic/CSE.json", "Grade/Graphs.html", "Grade/Graphs.css", "Grade/Graphs.js", "Grade/chart.umd.js"],
       "matches": ["https://portal.aiub.edu/*"]
     }
   ]

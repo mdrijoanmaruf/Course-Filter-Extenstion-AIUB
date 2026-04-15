@@ -63,6 +63,14 @@
     return m ? parseFloat(m[0]) : 0;
   }
 
+  function normText(v) {
+    return String(v || '').replace(/\s+/g, ' ').trim().toUpperCase();
+  }
+
+  function normCode(v) {
+    return normText(v).replace(/\s+/g, '');
+  }
+
   function saveGraphData(mutator) {
     if (!chrome.storage || !chrome.storage.local) return;
     chrome.storage.local.get({ aiubGraphData: {} }, function (res) {
@@ -74,66 +82,86 @@
   }
 
   function persistSemesterGraphData(infoItems, semesters) {
-    const allCourses = [];
-    semesters.forEach(s => allCourses.push(...s.courses));
-
-    function sumCredit(courses, predicate) {
-      return courses
-        .filter(predicate)
-        .reduce((sum, c) => sum + parseCreditValue(c.creditValue), 0);
-    }
-
-    const passFail = {
-      passed: allCourses.filter(c => c.state === 'done').length,
-      ongoing: allCourses.filter(c => c.state === 'ong').length,
-      dropped: allCourses.filter(c => c.state === 'wdn').length,
-      failed: allCourses.filter(c => c.state === 'fail').length,
-    };
-
-    const passFailCredits = {
-      passed: sumCredit(allCourses, c => c.state === 'done'),
-      ongoing: sumCredit(allCourses, c => c.state === 'ong'),
-      dropped: sumCredit(allCourses, c => c.state === 'wdn'),
-      failed: sumCredit(allCourses, c => c.state === 'fail'),
-    };
-
-    const semesterGpaTrend = semesters
-      .map(sem => ({
-        label: sem.label,
-        gpa: extractNumber(sem.summary && sem.summary.gpa),
-      }))
-      .filter(p => p.gpa > 0);
-
-    const cgpaTrend = semesters
-      .map(sem => ({
-        label: sem.label,
-        cgpa: extractNumber(sem.summary && sem.summary.cgpa),
-      }))
-      .filter(p => p.cgpa > 0);
-
-    const creditBySemester = semesters
-      .map(sem => ({
-        label: sem.label,
-        credits: extractNumber(sem.summary && sem.summary.ecr),
-      }))
-      .filter(p => p.credits > 0);
-
-    const payload = {
-      studentName: getInfoValue(infoItems, ['Name', 'Student Name']),
-      studentId: getInfoValue(infoItems, ['Id', 'Student Id']),
-      program: getInfoValue(infoItems, ['Program', 'Department']),
-      latestCgpa: extractNumber(getInfoValue(infoItems, ['Cgpa', 'CGPA'])),
-      totalCredits: allCourses.reduce((sum, c) => sum + parseCreditValue(c.creditValue), 0),
-      totalCourses: allCourses.length,
-      passFail,
-      passFailCredits,
-      semesterGpaTrend,
-      cgpaTrend,
-      creditBySemester,
-      capturedAt: new Date().toISOString(),
-    };
-
     saveGraphData(store => {
+      const curriculum = store.curriculum || {};
+      const coreCodeSet = new Set((curriculum.coreCourseCodes || []).map(normCode));
+      const coreNameSet = new Set((curriculum.coreCourseNames || []).map(normText));
+      const hasCoreMap = coreCodeSet.size > 0 || coreNameSet.size > 0;
+
+      function isCoreCourse(course) {
+        if (!hasCoreMap) return true;
+        const code = normCode(course.classId);
+        const name = normText(course.name);
+        return coreCodeSet.has(code) || coreNameSet.has(name);
+      }
+
+      const filteredSemesters = semesters.map(sem => ({
+        label: sem.label,
+        summary: sem.summary,
+        courses: sem.courses.filter(isCoreCourse),
+      }));
+
+      const allCourses = [];
+      filteredSemesters.forEach(s => allCourses.push(...s.courses));
+
+      function sumCredit(courses, predicate) {
+        return courses
+          .filter(predicate)
+          .reduce((sum, c) => sum + parseCreditValue(c.creditValue), 0);
+      }
+
+      const passFail = {
+        passed: allCourses.filter(c => c.state === 'done').length,
+        ongoing: allCourses.filter(c => c.state === 'ong').length,
+        dropped: allCourses.filter(c => c.state === 'wdn').length,
+        failed: allCourses.filter(c => c.state === 'fail').length,
+      };
+
+      const passFailCredits = {
+        passed: sumCredit(allCourses, c => c.state === 'done'),
+        ongoing: sumCredit(allCourses, c => c.state === 'ong'),
+        dropped: sumCredit(allCourses, c => c.state === 'wdn'),
+        failed: sumCredit(allCourses, c => c.state === 'fail'),
+      };
+
+      const semesterGpaTrend = filteredSemesters
+        .map(sem => ({
+          label: sem.label,
+          gpa: extractNumber(sem.summary && sem.summary.gpa),
+        }))
+        .filter(p => p.gpa > 0);
+
+      const cgpaTrend = filteredSemesters
+        .map(sem => ({
+          label: sem.label,
+          cgpa: extractNumber(sem.summary && sem.summary.cgpa),
+        }))
+        .filter(p => p.cgpa > 0);
+
+      const creditBySemester = filteredSemesters
+        .map(sem => ({
+          label: sem.label,
+          credits: sem.courses
+            .filter(c => c.state === 'done')
+            .reduce((sum, c) => sum + parseCreditValue(c.creditValue), 0),
+        }))
+        .filter(p => p.credits > 0);
+
+      const payload = {
+        studentName: getInfoValue(infoItems, ['Name', 'Student Name']),
+        studentId: getInfoValue(infoItems, ['Id', 'Student Id']),
+        program: getInfoValue(infoItems, ['Program', 'Department']),
+        latestCgpa: extractNumber(getInfoValue(infoItems, ['Cgpa', 'CGPA'])),
+        totalCredits: allCourses.reduce((sum, c) => sum + parseCreditValue(c.creditValue), 0),
+        totalCourses: allCourses.length,
+        passFail,
+        passFailCredits,
+        semesterGpaTrend,
+        cgpaTrend,
+        creditBySemester,
+        capturedAt: new Date().toISOString(),
+      };
+
       store.semester = payload;
     });
   }

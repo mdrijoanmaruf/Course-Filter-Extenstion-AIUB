@@ -310,6 +310,17 @@ body {
   overflow: auto hidden;
 }
 
+.chartjs-holder {
+  position: relative;
+  min-height: 240px;
+  width: 100%;
+}
+
+.chartjs-holder canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .chart svg {
   width: 100%;
   height: auto;

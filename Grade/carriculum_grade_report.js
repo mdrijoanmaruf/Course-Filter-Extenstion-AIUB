@@ -249,9 +249,8 @@
   }
 
   function persistCurriculumGraphData(infoItems, semSections, electiveRows) {
-    const allRows = [];
-    semSections.forEach(sec => allRows.push(...sec.rows));
-    allRows.push(...electiveRows);
+    const coreRows = [];
+    semSections.forEach(sec => coreRows.push(...sec.rows));
 
     function sumCredit(rows, predicate) {
       return rows
@@ -260,27 +259,27 @@
     }
 
     const stateCredits = {
-      completed: sumCredit(allRows, r => r.state === 'done'),
-      ongoing: sumCredit(allRows, r => r.state === 'ong'),
-      withdrawn: sumCredit(allRows, r => r.state === 'wdn'),
-      notAttempted: sumCredit(allRows, r => r.state === 'nd'),
+      completed: sumCredit(coreRows, r => r.state === 'done'),
+      ongoing: sumCredit(coreRows, r => r.state === 'ong'),
+      withdrawn: sumCredit(coreRows, r => r.state === 'wdn'),
+      notAttempted: sumCredit(coreRows, r => r.state === 'nd'),
     };
 
     const stateCounts = {
-      completed: allRows.filter(r => r.state === 'done').length,
-      ongoing: allRows.filter(r => r.state === 'ong').length,
-      withdrawn: allRows.filter(r => r.state === 'wdn').length,
-      notAttempted: allRows.filter(r => r.state === 'nd').length,
+      completed: coreRows.filter(r => r.state === 'done').length,
+      ongoing: coreRows.filter(r => r.state === 'ong').length,
+      withdrawn: coreRows.filter(r => r.state === 'wdn').length,
+      notAttempted: coreRows.filter(r => r.state === 'nd').length,
     };
 
     const gradeDistribution = {};
-    allRows.forEach(r => {
+    coreRows.forEach(r => {
       const grade = r.grades.length ? r.grades[r.grades.length - 1].grade : '-';
       const key = !r.grades.length ? 'N/A' : (grade === '-' ? 'Ongoing' : grade);
       gradeDistribution[key] = (gradeDistribution[key] || 0) + parseCreditValue(r.credit);
     });
 
-    const notAttemptedRows = allRows.filter(r => r.state === 'nd');
+    const notAttemptedRows = coreRows.filter(r => r.state === 'nd');
     const locked = notAttemptedRows.filter(r => r.locked);
     const unlocked = notAttemptedRows.filter(r => !r.locked);
 
@@ -308,8 +307,11 @@
       studentId: getInfoValue(infoItems, ['Id', 'Student Id']),
       program: getInfoValue(infoItems, ['Program', 'Department']),
       cgpa: extractNumber(getInfoValue(infoItems, ['Cgpa', 'CGPA'])),
-      totalCredits: allRows.reduce((sum, r) => sum + parseCreditValue(r.credit), 0),
-      totalCourses: allRows.length,
+      totalCredits: coreRows.reduce((sum, r) => sum + parseCreditValue(r.credit), 0),
+      totalCourses: coreRows.length,
+      coreCourseCodes: [...new Set(coreRows.map(r => normCode(r.code)).filter(Boolean))],
+      coreCourseNames: [...new Set(coreRows.map(r => norm(r.name)).filter(Boolean))],
+      electiveCreditsExcluded: electiveRows.reduce((sum, r) => sum + parseCreditValue(r.credit), 0),
       stateCredits,
       stateCounts,
       gradeDistribution,
