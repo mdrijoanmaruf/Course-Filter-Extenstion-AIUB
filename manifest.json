@@ -85,8 +85,7 @@
     {
       "resources": [
         "aiub.jpg",
-        "Academic/CSE.json",
-        "Shared/Sidebar.css"
+        "Academic/CSE.json"
       ],
       "matches": ["https://portal.aiub.edu/*"]
     }

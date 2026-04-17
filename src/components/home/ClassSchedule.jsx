@@ -4,20 +4,36 @@ import { createRoot } from 'react-dom/client';
 function getDateForLabel(text) {
   text = text.trim();
   const now = new Date();
-  if (/^today$/i.test(text)) return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (/^today$/i.test(text)) return today;
   if (/^tomorrow$/i.test(text)) {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const d = new Date(today);
     d.setDate(d.getDate() + 1);
     return d;
   }
   const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
-  const m = text.match(/(\d{1,2})-(\w{3})-(\d{4})/);
-  if (m) return new Date(parseInt(m[3]), months[m[2]], parseInt(m[1]));
+  // "DD-Mon-YYYY"
+  const m1 = text.match(/(\d{1,2})-(\w{3})-(\d{4})/);
+  if (m1) return new Date(parseInt(m1[3]), months[m1[2]], parseInt(m1[1]));
+  // "DD Mon YYYY" or "Mon DD, YYYY"
+  const m2 = text.match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/);
+  if (m2) return new Date(parseInt(m2[3]), months[m2[2]], parseInt(m2[1]));
+  // Day-name only (Sun/Mon/…/Sat) — find the next matching weekday from today
+  const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const idx = dayNames.findIndex((d) => text.toLowerCase().startsWith(d));
+  if (idx !== -1) {
+    const diff = (idx - today.getDay() + 7) % 7;
+    const d = new Date(today);
+    d.setDate(d.getDate() + diff);
+    return d;
+  }
   return null;
 }
 
 function parseTimePart(str) {
-  const m = str.trim().match(/\w+\s+(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  // Accepts "DayName H:M AM/PM", "H:MM AM/PM", or "H:M" (single-digit minutes like "1:0 PM")
+  // The optional (?:[a-zA-Z]+\s+)? handles a leading day-name prefix gracefully.
+  const m = str.trim().match(/(?:[a-zA-Z]+\s+)?(\d{1,2}):(\d{1,2})\s*(AM|PM)?/i);
   if (!m) return null;
   let h = parseInt(m[1]);
   const min = parseInt(m[2]);
@@ -104,77 +120,157 @@ function ClassTimer({ startTs, endTs }) {
 
   if (now >= endTs) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-400 mt-1.5">
-        <span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block" />
-        Ended
-      </span>
+      <div className="mt-2.5 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100/80 w-fit">
+        <span className="w-2 h-2 rounded-full bg-slate-400 inline-block flex-shrink-0" />
+        <span className="text-[11px] font-bold text-slate-400 tracking-wide">Class Ended</span>
+      </div>
     );
   }
   if (now >= startTs) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 mt-1.5 animate-pulse">
-        <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
-        In Progress · {fmtDuration(endTs - now)} left
-      </span>
+      <div className="mt-2.5 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg w-fit" style={{ background: 'rgba(22,163,74,0.12)' }}>
+        <span className="w-2 h-2 rounded-full bg-green-500 inline-block flex-shrink-0 animate-pulse" />
+        <span className="text-[11px] font-bold text-green-700 tracking-wide">
+          In Progress &nbsp;·&nbsp; {fmtDuration(endTs - now)} left
+        </span>
+      </div>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 mt-1.5">
-      <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />
-      Starts in {fmtDuration(startTs - now)}
-    </span>
+    <div className="mt-2.5 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg w-fit" style={{ background: 'rgba(2,132,199,0.10)' }}>
+      <span className="w-2 h-2 rounded-full bg-blue-500 inline-block flex-shrink-0" />
+      <span className="text-[11px] font-bold text-blue-700 tracking-wide">
+        Starts in {fmtDuration(startTs - now)}
+      </span>
+    </div>
+  );
+}
+
+function ClassCard({ cls, isToday }) {
+  const cardStyle = isToday
+    ? { background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 60%, #e0f2fe 100%)', borderColor: '#93c5fd' }
+    : { background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 60%, #f0fdf4 100%)', borderColor: '#bae6fd' };
+
+  return (
+    <div
+      className="flex-1 min-w-[230px] max-w-sm rounded-2xl border p-0 overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5"
+      style={{ ...cardStyle, boxShadow: '0 2px 8px rgba(2,132,199,0.08)' }}
+    >
+      {/* Top accent bar */}
+      <div
+        className="h-1 w-full"
+        style={{ background: isToday ? 'linear-gradient(90deg,#0284c7,#06b6d4,#6366f1)' : 'linear-gradient(90deg,#38bdf8,#06b6d4)' }}
+      />
+
+      <div className="p-3.5">
+        {/* Course name */}
+        <a
+          href={cls.href.startsWith('/') ? cls.href : '#'}
+          className="block font-extrabold text-[13px] text-slate-800 hover:text-blue-700 mb-2.5 leading-snug"
+          style={{ textDecoration: 'none' }}
+        >
+          {cls.name}
+        </a>
+
+        {/* Time */}
+        {cls.time && (
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-blue-400 text-[12px]">🕐</span>
+            <span className="text-[12px] font-semibold text-slate-600">{cls.time}</span>
+          </div>
+        )}
+
+        {/* Room */}
+        {cls.room && (
+          <div className="flex items-center gap-1.5">
+            <span className="text-[12px]">📍</span>
+            <span className="text-[11.5px] font-medium text-slate-500">{cls.room}</span>
+          </div>
+        )}
+
+        {/* Timer */}
+        <ClassTimer startTs={cls.startTs} endTs={cls.endTs} />
+      </div>
+    </div>
+  );
+}
+
+function DaySection({ day }) {
+  const isToday = day.isToday;
+  const isTomorrow = day.isTomorrow;
+
+  return (
+    <div className={`mb-5 rounded-2xl overflow-hidden ${isToday ? 'ring-2 ring-blue-300 ring-offset-1' : ''}`}
+      style={isToday ? { boxShadow: '0 4px 16px rgba(2,132,199,0.13)' } : {}}>
+
+      {/* Day header */}
+      <div
+        className="px-4 py-2.5 flex items-center gap-3"
+        style={
+          isToday
+            ? { background: 'linear-gradient(90deg,#0284c7 0%,#0ea5e9 60%,#06b6d4 100%)' }
+            : isTomorrow
+            ? { background: 'linear-gradient(90deg,#7c3aed,#8b5cf6)' }
+            : { background: 'linear-gradient(90deg,#64748b,#94a3b8)' }
+        }
+      >
+        {isToday && <span className="text-[14px]">📅</span>}
+        <span className="text-[12px] font-extrabold text-white uppercase tracking-widest">
+          {day.label}
+        </span>
+        {isToday && (
+          <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white border border-white/30">
+            TODAY
+          </span>
+        )}
+        {isTomorrow && (
+          <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white border border-white/30">
+            TOMORROW
+          </span>
+        )}
+      </div>
+
+      {/* Cards */}
+      <div
+        className="p-3 flex flex-wrap gap-2.5"
+        style={isToday ? { background: 'rgba(239,246,255,0.6)' } : { background: 'rgba(248,250,252,0.6)' }}
+      >
+        {day.classes.map((cls, j) => (
+          <ClassCard key={j} cls={cls} isToday={isToday} />
+        ))}
+      </div>
+    </div>
   );
 }
 
 function ScheduleView({ days }) {
+  const totalClasses = days.reduce((s, d) => s + d.classes.length, 0);
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-3 pb-2.5 border-b-2 border-slate-100">
-        <h3 className="text-[16px] font-bold text-slate-900 leading-tight">
-          Class <span className="text-blue-600">Schedule</span>
-        </h3>
+      {/* Section title */}
+      <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-slate-100">
+        <div className="flex items-center gap-2">
+          <span className="text-[18px]">🗓️</span>
+          <h3 className="text-[17px] font-extrabold text-slate-900 leading-tight m-0">
+            Class{' '}
+            <span style={{
+              background: 'linear-gradient(135deg,#0284c7,#06b6d4)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              Schedule
+            </span>
+          </h3>
+        </div>
+        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+          {totalClasses} {totalClasses === 1 ? 'class' : 'classes'}
+        </span>
       </div>
 
       {days.map((day, i) => (
-        <div key={i} className="mb-4">
-          <div className="mb-2">
-            <span className={`inline-block text-[11px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wide ${
-              day.isToday
-                ? 'bg-blue-600 text-white'
-                : day.isTomorrow
-                ? 'bg-violet-600 text-white'
-                : 'bg-slate-100 text-slate-500'
-            }`}>
-              {day.label}
-            </span>
-          </div>
-
-          <div className="flex flex-wrap gap-2.5">
-            {day.classes.map((cls, j) => (
-              <div
-                key={j}
-                className="flex-1 min-w-[230px] max-w-sm bg-white border border-slate-200 rounded-xl p-3 shadow-sm hover:border-blue-200 hover:shadow-md transition-all"
-              >
-                <a
-                  href={cls.href.startsWith('/') ? cls.href : '#'}
-                  className="block font-bold text-[13px] text-slate-900 hover:text-blue-600 mb-1 truncate"
-                >
-                  {cls.name}
-                </a>
-                {cls.time && (
-                  <div className="flex items-center gap-1 text-[12px] text-slate-500 mb-0.5">
-                    <span className="text-slate-400 text-[11px]">🕐</span>
-                    <label className="font-medium text-slate-600 m-0">{cls.time}</label>
-                  </div>
-                )}
-                {cls.room && (
-                  <div className="text-[11px] text-slate-400">Room: {cls.room}</div>
-                )}
-                <ClassTimer startTs={cls.startTs} endTs={cls.endTs} />
-              </div>
-            ))}
-          </div>
-        </div>
+        <DaySection key={i} day={day} />
       ))}
     </div>
   );

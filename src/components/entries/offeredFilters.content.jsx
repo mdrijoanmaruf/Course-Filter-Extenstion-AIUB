@@ -1,2 +1,2 @@
-import '../../../public/styles.css';
+import '../../content.css';
 import '../content/content.jsx';
