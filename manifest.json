@@ -92,8 +92,7 @@
         "Grade/chart.umd.js",
         "Grade/carriculum_grade_report.css",
         "Grade/carriculum_grade_semester.css",
-        "Shared/Sidebar.css",
-        "Shared/Navbar.css"
+        "Shared/Sidebar.css"
       ],
       "matches": ["https://portal.aiub.edu/*"]
     }

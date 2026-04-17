@@ -55,6 +55,29 @@
     if (fallback) fallback.appendChild(link);
   }
 
+  function cleanup() {
+    const styleEl = document.getElementById('aiub-sidebar-style');
+    if (styleEl) styleEl.remove();
+
+    const sidebar = document.getElementById('navigation-bar');
+    if (!sidebar) return;
+
+    sidebar.querySelectorAll('.nav-profile-block, .nav-section-divider, .aiub-graph-nav-item').forEach((el) => el.remove());
+
+    sidebar.querySelectorAll('.aiub-active-item').forEach((a) => {
+      a.classList.remove('active', 'aiub-active-item');
+    });
+
+    sidebar.querySelectorAll('.aiub-open-collapse').forEach((collapse) => {
+      collapse.classList.remove('in', 'aiub-open-collapse');
+    });
+
+    sidebar.querySelectorAll('.aiub-expanded-trigger').forEach((trigger) => {
+      trigger.classList.remove('aria-expanded-true', 'aiub-expanded-trigger');
+      trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+
   function enhance() {
     const sidebar = document.getElementById('navigation-bar');
     if (!sidebar) return;
@@ -68,7 +91,7 @@
     const idMatch = rawId.match(/(\d{2}-\d{5}-\d+)/);
     const studentId = idMatch ? idMatch[1] : '';
 
-    if (name) {
+    if (name && !sidebar.querySelector('.nav-profile-block')) {
       sidebar.insertAdjacentHTML('afterbegin',
         '<div class="nav-profile-block">' +
           '<div class="nav-profile-name">' + escHtml(name) + '</div>' +
@@ -82,20 +105,25 @@
       try {
         const href = new URL(a.href).pathname;
         if (path.startsWith(href) && href !== '/Student') {
-          a.classList.add('active');
+          a.classList.add('active', 'aiub-active-item');
           const collapse = a.closest('.panel-collapse');
           if (collapse) {
-            collapse.classList.add('in');
-            collapse.style.height = 'auto';
+            collapse.classList.add('in', 'aiub-open-collapse');
             const trigger = sidebar.querySelector('[href="#' + collapse.id + '"]');
-            if (trigger) trigger.setAttribute('aria-expanded', 'true');
+            if (trigger) {
+              trigger.setAttribute('aria-expanded', 'true');
+              trigger.classList.add('aria-expanded-true', 'aiub-expanded-trigger');
+            }
           }
         }
       } catch (_) {}
     });
 
     sidebar.querySelectorAll('.panel-group > .panel + .panel').forEach((panel) => {
-      panel.insertAdjacentHTML('beforebegin', '<div class="nav-section-divider"></div>');
+      const prev = panel.previousElementSibling;
+      if (!prev || !prev.classList || !prev.classList.contains('nav-section-divider')) {
+        panel.insertAdjacentHTML('beforebegin', '<div class="nav-section-divider"></div>');
+      }
     });
   }
 
@@ -104,12 +132,28 @@
     else setTimeout(tryEnhance, 150);
   }
 
-  chrome.storage.sync.get({ extensionEnabled: true }, (r) => {
-    if (!r.extensionEnabled) return;
+  function applyEnabledState(enabled) {
+    if (!enabled) {
+      cleanup();
+      return;
+    }
+
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', tryEnhance);
+      document.addEventListener('DOMContentLoaded', tryEnhance, { once: true });
     } else {
       tryEnhance();
+    }
+  }
+
+  chrome.storage.sync.get({ extensionEnabled: true }, (r) => {
+    applyEnabledState(Boolean(r && r.extensionEnabled));
+  });
+
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'sync' || !changes.extensionEnabled) return;
+    applyEnabledState(Boolean(changes.extensionEnabled.newValue));
+    if (!changes.extensionEnabled.newValue) {
+      cleanup();
     }
   });
 })();
