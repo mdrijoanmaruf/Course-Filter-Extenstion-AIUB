@@ -1,56 +1,75 @@
 import { createRoot } from 'react-dom/client';
+import { useEffect, useRef } from 'react';
 import '../../content.css';
 
 // Drop Application: Angular-rendered list is preserved.
 // React renders a header with refund %; CSS overrides style the Angular list.
 
-function DropHeader({ pct }) {
+function DropView({ pct, angularNode, rulesNode }) {
   const pctNum = parseFloat(pct);
   const isGood = pctNum > 0;
+  const mainRef = useRef(null);
+
+  useEffect(() => {
+    if (!mainRef.current) return;
+    if (rulesNode) mainRef.current.appendChild(rulesNode);
+    if (angularNode) mainRef.current.appendChild(angularNode);
+  }, [angularNode, rulesNode]);
 
   return (
-    <div className="mb-6" style={{ boxSizing: 'border-box' }}>
-      {/* Title Section */}
-      <div className="mb-5">
-        <h1 className="text-[24px] font-extrabold text-slate-900 m-0 mb-1">
-          Course <span style={{ background: 'linear-gradient(135deg, #0284c7, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Drop</span>
-        </h1>
-        <p className="text-[13px] text-slate-500 m-0">Request to drop courses with real-time refund information</p>
+    <div className="text-[13px] text-slate-800" style={{ boxSizing: 'border-box' }}>
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-6 pb-4" style={{ borderBottom: '1px solid #e2e8f0' }}>
+        <div className="flex flex-col">
+          <h2 className="text-[18px] font-bold text-slate-900 tracking-tight m-0">
+            Course <span style={{ background: 'linear-gradient(135deg, #0284c7, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Drop</span>
+          </h2>
+          <p className="text-[12px] text-slate-500 m-0 mt-0.5">Request to drop courses with real-time refund information</p>
+        </div>
       </div>
 
-      {/* Info Cards Grid */}
-      <div className="grid gap-3 mb-5" style={{ gridTemplateColumns: '1fr 1fr' }}>
-        {/* Refund Card */}
-        <div className="rounded-lg border p-4 transition-all hover:shadow-md" style={{ 
-          backgroundColor: isGood ? '#f0fdf4' : '#fef2f2',
-          borderColor: isGood ? '#dcfce7' : '#fecaca'
-        }}>
-          <div className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: isGood ? '#166534' : '#991b1b' }}>
-            💰 Current Refund
+      {/* Grid Layout */}
+      <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 270px', alignItems: 'start' }}>
+        {/* Main Column for Angular List and Rules */}
+        <div className="flex flex-col gap-3 min-w-0" ref={mainRef}></div>
+
+        {/* Side Panel for Status Info */}
+        <div 
+          className="border rounded-lg overflow-hidden shadow-md" 
+          style={{ 
+            position: 'sticky', 
+            top: 16, 
+            backgroundColor: '#f8fafc',
+            borderColor: '#cbd5e1',
+            borderWidth: '1px'
+          }}
+        >
+          <div 
+            className="px-3.5 py-2.5 text-[11px] font-bold uppercase tracking-wider text-white"
+            style={{ 
+              background: isGood ? 'linear-gradient(to right, #16a34a, #15803d)' : 'linear-gradient(to right, #e11d48, #be123c)'
+            }}
+          >
+            💰 Refund Status
           </div>
-          <div className="flex items-end gap-2">
-            <span className="text-[28px] font-extrabold" style={{ color: isGood ? '#166534' : '#991b1b' }}>
+          <div className="p-5 flex flex-col items-center justify-center bg-white" style={{ borderBottom: '1px solid #e2e8f0' }}>
+            <span className="text-[36px] font-extrabold leading-none mb-2" style={{ color: isGood ? '#166534' : '#991b1b' }}>
               {pct}
             </span>
-            <span className="text-[11px] font-semibold mb-1" style={{ color: isGood ? '#22c55e' : '#f43f5e' }}>
+            <span className={`text-[11px] font-bold px-3 py-1 rounded-full ${isGood ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}`}>
               {isGood ? '✓ Eligible' : '✗ Not Eligible'}
             </span>
           </div>
-        </div>
-
-        {/* Notice Card */}
-        <div className="rounded-lg border p-4 bg-gradient-to-br from-blue-50 to-cyan-50" style={{ borderColor: '#bfdbfe' }}>
-          <div className="text-[11px] font-bold uppercase tracking-wider text-blue-900 mb-2">
-            ℹ️ Important
+          <div className="p-4 bg-slate-50">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+              ℹ️ Important Notice
+            </div>
+            <p className="text-[11px] text-slate-500 m-0 leading-relaxed">
+              Verify refund deadlines before submitting. Drops may affect your credit limit and financial status.
+            </p>
           </div>
-          <p className="text-[12px] text-blue-800 m-0 leading-snug font-medium">
-            Check refund deadline before submitting
-          </p>
         </div>
       </div>
-
-      {/* Divider */}
-      <div style={{ borderBottom: '1px solid #e2e8f0', marginBottom: '16px' }} />
     </div>
   );
 }
@@ -82,18 +101,21 @@ function DropHeader({ pct }) {
         #Rules .table td{font-size:12px!important;padding:9px 14px!important;color:#475569!important;border-color:#f1f5f9!important}
         #Rules .table tbody tr:hover{background:#f8fafc!important}
         [ng-controller="DropApplicationController2"] .ng-scope>[ng-repeat]{display:none!important}
-        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope{background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:12px!important;padding:0!important;overflow:hidden;transition:all .25s ease;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope:hover{box-shadow:0 8px 16px rgba(2,132,199,.12);border-color:#7dd3fc;transform:translateY(-2px)}
-        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope>.row{margin:0!important;padding:14px 16px!important;align-items:center;display:flex!important}
-        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-1{flex:0 0 auto!important}
-        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-6{flex:1 1 auto!important}
-        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-2{flex:0 0 auto!important;text-align:right!important}
-        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-1>span[style*="steelblue"]{color:#0284c7!important;font-family:'Fira Code','JetBrains Mono',monospace!important;font-size:12px!important;font-weight:700!important;background:#dbeafe;padding:4px 8px;border-radius:5px;display:inline-block!important;letter-spacing:.3px}
-        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-6>span[style*="slateblue"]{color:#1e293b!important;font-size:14px!important;font-weight:700!important;display:block!important;margin-bottom:4px}
-        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-6 small.ng-binding{display:inline-block;margin:2px 6px 0 0;font-size:11px!important;color:#64748b!important;background:#e2e8f0;padding:3px 9px;border-radius:4px;font-weight:500}
-        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-2 span.ng-binding:not(.ng-hide){display:inline-flex!important;align-items:center!important;background:#fee2e2!important;color:#991b1b!important;font-size:11px!important;font-weight:700!important;padding:4px 10px!important;border-radius:5px!important;gap:4px}
-        [ng-controller="DropApplicationController2"] [ng-repeat] a.btn.btn-danger{font-size:12px!important;font-weight:600!important;background:linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)!important;color:#991b1b!important;border:1.5px solid #fca5a5!important;border-radius:7px!important;padding:6px 12px!important;box-shadow:0 2px 4px rgba(153,27,27,.1)!important;transition:all .2s ease!important;cursor:pointer!important}
-        [ng-controller="DropApplicationController2"] [ng-repeat] a.btn.btn-danger:hover{background:linear-gradient(135deg, #fecaca 0%, #f87171 100%)!important;border-color:#f87171!important;box-shadow:0 4px 12px rgba(220,38,38,.2)!important;transform:translateY(-1px)!important}
+        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope{background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;margin-bottom:12px!important;padding:0!important;overflow:hidden;transition:all .2s ease;box-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05)}
+        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope:hover{box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);border-color:#bae6fd;transform:translateY(-1px)}
+        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope>.row{margin:0!important;padding:12px 14px!important;align-items:flex-start;display:flex!important;gap:12px}
+        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-1{flex:0 0 auto!important;padding:0!important;width:auto!important}
+        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-6{flex:1 1 auto!important;padding:0!important;min-width:0}
+        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-2{flex:0 0 auto!important;padding:0!important;text-align:right!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;justify-content:center!important;min-height:48px}
+        
+        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-1>span[style*="steelblue"]{color:#0284c7!important;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace!important;font-size:11px!important;font-weight:700!important;letter-spacing:0.025em;text-transform:uppercase;background:transparent!important;padding:0!important;display:block!important;margin-bottom:2px!important}
+        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-6>span[style*="slateblue"]{color:#0f172a!important;font-size:13px!important;font-weight:600!important;line-height:1.375!important;display:block!important;margin-bottom:6px!important}
+        
+        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-6 small.ng-binding{display:inline-flex!important;align-items:center!important;margin:0 6px 4px 0!important;font-size:10px!important;color:#475569!important;background:#f1f5f9!important;padding:2px 8px!important;border-radius:6px!important;font-weight:600!important;letter-spacing:0.025em!important}
+        
+        [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-2 span.ng-binding:not(.ng-hide){display:inline-flex!important;align-items:center!important;background:#fef2f2!important;color:#991b1b!important;font-size:10px!important;font-weight:600!important;padding:2px 8px!important;border-radius:4px!important;margin-bottom:8px!important}
+        [ng-controller="DropApplicationController2"] [ng-repeat] a.btn.btn-danger{font-size:11px!important;font-weight:600!important;background:#fee2e2!important;color:#991b1b!important;border:1px solid #fca5a5!important;border-radius:6px!important;padding:6px 14px!important;box-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05)!important;transition:all .15s ease!important;cursor:pointer!important;text-transform:uppercase!important;letter-spacing:0.025em!important;display:inline-block!important;margin-top:auto!important}
+        [ng-controller="DropApplicationController2"] [ng-repeat] a.btn.btn-danger:hover{background:#fecaca!important;border-color:#f87171!important;box-shadow:0 4px 6px -1px rgb(239 68 68 / 0.1)!important}
         [ng-controller="DropApplicationController2"] [ng-repeat] .label.label-warning{background:#fef3c7!important;color:#92400e!important;border-radius:5px!important;font-size:11px!important;padding:4px 10px!important;font-weight:700!important}
         [ng-controller="DropApplicationController2"] h5.text-center{font-size:14px!important;font-weight:700!important;color:#1e293b!important;margin:12px 0!important}
         [ng-controller="DropApplicationController2"] .table-condensed th{font-size:11px!important;text-transform:uppercase;letter-spacing:.6px;color:#64748b!important;background:linear-gradient(to right, #f8fafc, #f1f5f9)!important;border-bottom:1px solid #e2e8f0!important;padding:10px 12px!important;font-weight:700!important}
@@ -110,17 +132,18 @@ function DropHeader({ pct }) {
         if (badge) pct = badge.textContent.trim();
       }
 
-      // Mount React header before the Angular controller
-      const target =
-        document.querySelector('[ng-controller="DropApplicationController2"]') ||
-        document.querySelector('.margin5');
-      if (!target) return;
-
+      // Mount React layout wrapping Angular controller and rules
+      const target = document.querySelector('[ng-controller="DropApplicationController2"]');
       const rulesRow = document.querySelector('.portal-body > .row');
+      
       const insertBefore = rulesRow || target;
+      if (!insertBefore) return;
+
       const container = document.createElement('div');
       insertBefore.parentNode.insertBefore(container, insertBefore);
-      createRoot(container).render(<DropHeader pct={pct} />);
+      createRoot(container).render(
+        <DropView pct={pct} angularNode={target} rulesNode={rulesRow} />
+      );
     }
 
     if (document.readyState === 'loading') {

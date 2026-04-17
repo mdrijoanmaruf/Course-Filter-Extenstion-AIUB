@@ -100,19 +100,28 @@ function SummaryCards({ totalDebit, totalCredit, finalBalance }) {
         const cells = Array.from(row.querySelectorAll('td'));
         if (!cells.length) return;
 
-        if (cells[0].hasAttribute('colspan')) {
+        if (cells[0].hasAttribute('colspan') || row.textContent.toLowerCase().includes('total')) {
           row.style.background = 'linear-gradient(to right, #f1f5f9, #e0f2fe)';
           row.style.fontWeight = '700';
-          if (cells.length >= 5) {
-            totalDebit   = parseAmount(cells[1].querySelector('label')?.textContent || cells[1].textContent);
-            totalCredit  = parseAmount(cells[2].textContent);
-            finalBalance = parseAmount(cells[4].textContent);
+          if (cells.length >= 3) {
+            const debCell = cells.length >= 4 ? cells[1] : cells[cells.length - 3];
+            const credCell = cells.length >= 4 ? cells[2] : cells[cells.length - 2];
+            const bCell = cells[cells.length - 1];
+
+            totalDebit   = parseAmount(debCell.querySelector('label')?.textContent || debCell.textContent);
+            totalCredit  = parseAmount(credCell.textContent);
+            finalBalance = parseAmount(bCell.textContent);
           }
           return;
         }
-        if (cells.length < 6) return;
+        if (cells.length < 5) return;
 
-        const [dateCell, partCell, debitCell, creditCell,,balCell] = cells;
+        const dateCell = cells[0];
+        const partCell = cells[1];
+        const debitCell = cells[2];
+        const creditCell = cells[3];
+        const balCell = cells[cells.length - 1];
+
         dateCell.style.cssText = 'color:#1f2937!important;white-space:nowrap;font-size:13px!important;padding:12px 14px!important;border:none!important;border-bottom:1px solid #e5e7eb!important;background:#fff!important';
         partCell.style.cssText = 'max-width:320px;padding:12px 14px!important;border:none!important;border-bottom:1px solid #e5e7eb!important;vertical-align:middle;background:#fff!important;color:#1f2937!important';
         debitCell.style.cssText = 'text-align:right;white-space:nowrap;font-weight:700!important;padding:12px 14px!important;border:none!important;border-bottom:1px solid #e5e7eb!important;font-size:13px!important;background:#fff!important';
