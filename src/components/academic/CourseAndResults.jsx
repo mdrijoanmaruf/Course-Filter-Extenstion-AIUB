@@ -82,43 +82,61 @@ function parseTerm(termEl) {
 // ── Sub-components ───────────────────────────────────────────────────────────
 
 function SectionCard({ sec, isMidterm }) {
-  const [open, setOpen] = useState(true);
-  const scoreColor = isMidterm ? 'text-blue-600' : 'text-pink-600';
-  const chevronColor = isMidterm ? 'text-blue-400' : 'text-pink-400';
-  const hoverBg = isMidterm ? 'hover:bg-blue-50/50' : 'hover:bg-pink-50/50';
+  const [open, setOpen] = useState(false);
+  const scoreColor = isMidterm ? '#0891b2' : '#a855f7';
+  const hoverBg = isMidterm ? 'rgba(6, 182, 212, 0.1)' : 'rgba(168, 85, 247, 0.1)';
+  const borderColor = isMidterm ? '#b3e5fc' : '#e9d5ff';
+  const activeBg = open ? hoverBg : 'rgba(255, 255, 255, 0.6)';
 
   return (
-    <div className={`rounded-md overflow-hidden bg-white/40 ${!open ? '' : ''}`} style={{ marginBottom: 8 }}>
+    <div 
+      className="rounded-xl border overflow-hidden shadow-sm transition-all duration-300"
+      style={{ 
+        marginBottom: 10, 
+        background: activeBg,
+        borderColor: borderColor,
+        borderWidth: '1px'
+      }}
+    >
       <div
-        className={`flex justify-between items-center px-3.5 py-2.5 cursor-pointer select-none ${hoverBg}`}
+        className="flex justify-between items-center px-4 py-3 cursor-pointer select-none transition-colors duration-200"
+        style={{ background: hoverBg }}
         onClick={() => setOpen((v) => !v)}
       >
         <div>
-          <div className="text-[13px] font-semibold text-slate-900">{sec.name}</div>
-          {sec.meta.total && <div className="text-[11px] text-slate-400 mt-0.5">{metaLine(sec.meta)}</div>}
+          <div className="text-[14px] font-semibold text-slate-800">{sec.name}</div>
+          {sec.meta.total && <div className="text-[11px] text-slate-500 mt-1">{metaLine(sec.meta)}</div>}
         </div>
-        <div className="flex items-center gap-2.5">
-          <span className={`text-[16px] font-bold ${scoreColor}`}>{sec.score}</span>
-          <span className={`text-[11px] transition-transform ${chevronColor} ${open ? 'rotate-180' : ''}`}>▼</span>
+        <div className="flex items-center gap-3">
+          <span className="text-[16px] font-bold" style={{ color: scoreColor }}>{sec.score}</span>
+          <span 
+            className="text-[12px] transition-transform duration-300"
+            style={{ color: scoreColor, transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          >▼</span>
         </div>
       </div>
 
-      {open && (
-        <div className="px-3.5 pb-2 bg-white/30">
+      <div style={{ display: open ? 'block' : 'none', maxHeight: open ? '500px' : '0', opacity: open ? 1 : 0, overflow: 'hidden', transition: 'all 0.3s ease-in-out' }}>
+        <div className="px-4 pb-3">
+          <div className="w-full h-[1px] bg-slate-200/50 mb-2"></div>
           {sec.subItems.length === 0
-            ? <p className="text-[12px] italic text-slate-400 text-center py-3">No sub-items.</p>
+            ? <p className="text-[12px] italic text-slate-400 text-center py-2">No sub-items.</p>
             : sec.subItems.map((sub, i) => (
-              <div key={i} className={`flex justify-between items-center px-2.5 py-2 rounded mb-0.5 bg-white/20 hover:bg-white/50 ${isMidterm ? 'hover:bg-blue-50/40' : 'hover:bg-pink-50/40'}`}>
+              <div 
+                key={i} 
+                className="flex justify-between items-center px-3 py-2.5 rounded-lg mb-1 bg-white/70 shadow-sm transition-colors"
+                style={{ background: hoverBg }}
+              >
                 <div>
-                  <div className="text-[12px] font-medium text-slate-800">{sub.name}</div>
+                  <div className="text-[13px] font-medium text-slate-700">{sub.name}</div>
                   {sub.meta.total && <div className="text-[11px] text-slate-400 mt-0.5">{metaLine(sub.meta)}</div>}
                 </div>
-                <span className={`text-[13px] font-bold pl-2 ${scoreColor}`}>{sub.score}</span>
+                <span className="text-[14px] font-bold pl-2" style={{ color: scoreColor }}>{sub.score}</span>
               </div>
             ))
           }
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -127,66 +145,82 @@ function TermCard({ term }) {
   const [open, setOpen] = useState(true);
   const isMidterm = term.termName.toLowerCase().includes('midterm');
 
-  const cardStyle = isMidterm
-    ? 'bg-gradient-to-br from-sky-50 to-blue-50 border-[1.5px] border-blue-200 border-l-[5px] border-l-blue-600'
-    : 'bg-gradient-to-br from-orange-50 to-pink-50 border-[1.5px] border-pink-200 border-l-[5px] border-l-pink-500';
-  const labelStyle = isMidterm ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800';
-  const gradeColor2 = isMidterm ? 'text-blue-600' : 'text-pink-600';
-  const chevronColor = isMidterm ? 'text-blue-400' : 'text-pink-400';
+  const cardGradient = isMidterm
+    ? 'linear-gradient(135deg, #ecf7fe 0%, #e0f2fe 50%, #e0f9ff 100%)'
+    : 'linear-gradient(135deg, #f3e8ff 0%, #ede9fe 50%, #ddd6fe 100%)';
+  
+  const borderColor = isMidterm ? '#06b6d4' : '#a855f7';
+  const borderBgColor = isMidterm ? '#b3e5fc' : '#e9d5ff';
+  const labelBg = isMidterm ? '#cffafe' : '#e9d5ff';
+  const labelText = isMidterm ? '#0369a1' : '#6d28d9';
+  const chevronColor = isMidterm ? '#0891b2' : '#d946ef';
 
   return (
-    <div className={`rounded-xl mb-4 overflow-hidden ${cardStyle}`} style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+    <div 
+      className="rounded-xl mb-5 overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md"
+      style={{
+        background: cardGradient,
+        border: `1.5px solid ${borderBgColor}`,
+        borderLeft: `6px solid ${borderColor}`
+      }}
+    >
       <div
-        className="flex justify-between items-center flex-wrap gap-3 px-4 py-4 cursor-pointer select-none hover:opacity-90"
+        className="flex justify-between items-center flex-wrap gap-4 px-5 py-4 cursor-pointer select-none"
         onClick={() => setOpen((v) => !v)}
       >
-        <div className="flex items-center gap-2">
-          <span className={`text-[10px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-md ${labelStyle}`}>
+        <div className="flex items-center gap-3">
+          <span 
+            className="text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-md shadow-sm"
+            style={{ backgroundColor: labelBg, color: labelText }}
+          >
             {isMidterm ? 'Midterm' : 'Final'}
           </span>
           <div>
-            <div className="text-[15px] font-bold text-slate-900">{term.termName}</div>
-            {term.termMeta.total && <div className="text-[11px] text-slate-500 mt-0.5">{metaLine(term.termMeta)}</div>}
+            <div className="text-[16px] font-bold text-slate-800">{term.termName}</div>
+            {term.termMeta.total && <div className="text-[12px] text-slate-500 mt-1">{metaLine(term.termMeta)}</div>}
           </div>
         </div>
-        <div className="flex items-center gap-3.5">
-          {term.score && term.score !== '-' && <span className="text-[13px] text-slate-500">{term.score}</span>}
-          <span className="text-[24px] font-extrabold leading-none" style={{ color: gradeColor(term.grade) }}>{term.grade}</span>
-          <span className={`text-[11px] transition-transform ${chevronColor} ${open ? 'rotate-180' : ''}`}>▼</span>
+        <div className="flex items-center gap-4">
+          {term.score && term.score !== '-' && <span className="text-[14px] font-medium text-slate-600 bg-white/50 px-2 py-0.5 rounded-md">{term.score}</span>}
+          <span className="text-[26px] font-extrabold leading-none drop-shadow-sm" style={{ color: gradeColor(term.grade) }}>{term.grade}</span>
+          <span 
+            className="text-[12px] transition-transform duration-300"
+            style={{ color: chevronColor, transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          >▼</span>
         </div>
       </div>
 
-      {open && (
-        <div className="px-4 pb-4">
+      <div style={{ display: open ? 'block' : 'none', maxHeight: open ? '2000px' : '0', opacity: open ? 1 : 0, overflow: 'hidden', transition: 'all 0.3s ease-in-out' }}>
+        <div className="px-5 pb-5">
           {term.sections.length === 0
-            ? <p className="text-[12px] italic text-slate-400 text-center py-3">No data available yet.</p>
+            ? <p className="text-[13px] italic text-slate-400 text-center py-4 bg-white/40 rounded-lg">No data available yet.</p>
             : term.sections.map((sec, i) => <SectionCard key={i} sec={sec} isMidterm={isMidterm} />)
           }
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
 function CourseAndResultsView({ sectionOpts, semesterOpts, courseName, courseMeta, teacherText, finalGs, terms, onSectionChange, onSemesterChange }) {
   return (
-    <div className="text-[13px] text-slate-800 px-1" style={{ boxSizing: 'border-box' }}>
+    <div className="text-[14px] font-sans text-slate-800 px-1 w-full" style={{ boxSizing: 'border-box' }}>
       {/* Filter bar */}
-      <div className="flex gap-3 flex-wrap mb-5 items-end">
-        <div className="flex flex-col gap-1 flex-1 min-w-[160px]" style={{ flex: '2.5 1 0' }}>
-          <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Course</span>
+      <div className="flex gap-4 flex-wrap mb-6 items-end p-4 bg-white/60 backdrop-blur-md rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex flex-col gap-1.5 flex-1 min-w-[180px]" style={{ flex: '2.5 1 0' }}>
+          <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500 ml-1">Course</span>
           <select
-            className="border-[1.5px] border-slate-200 rounded-lg px-3 py-2 text-[13px] text-slate-900 bg-white cursor-pointer outline-none focus:border-blue-400 hover:border-slate-400 w-full"
+            className="border-[1.5px] border-slate-300 rounded-xl px-4 py-2.5 text-[14px] font-medium text-slate-800 bg-white cursor-pointer outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 hover:border-slate-400 w-full transition-all shadow-sm"
             onChange={(e) => onSectionChange(e.target.value)}
             defaultValue={sectionOpts.find((o) => o.selected)?.value || ''}
           >
             {sectionOpts.map((o) => <option key={o.value} value={o.value}>{o.text}</option>)}
           </select>
         </div>
-        <div className="flex flex-col gap-1 flex-1 min-w-[140px]">
-          <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Semester</span>
+        <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+          <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500 ml-1">Semester</span>
           <select
-            className="border-[1.5px] border-slate-200 rounded-lg px-3 py-2 text-[13px] text-slate-900 bg-white cursor-pointer outline-none focus:border-blue-400 hover:border-slate-400 w-full"
+            className="border-[1.5px] border-slate-300 rounded-xl px-4 py-2.5 text-[14px] font-medium text-slate-800 bg-white cursor-pointer outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 hover:border-slate-400 w-full transition-all shadow-sm"
             onChange={(e) => onSemesterChange(e.target.value)}
             defaultValue={semesterOpts.find((o) => o.selected)?.value || ''}
           >
@@ -196,25 +230,30 @@ function CourseAndResultsView({ sectionOpts, semesterOpts, courseName, courseMet
       </div>
 
       {/* Course card */}
-      <div className="flex justify-between items-start gap-4 bg-gradient-to-br from-sky-50 to-violet-50 border-[1.5px] border-blue-200 rounded-2xl px-5 py-4 mb-4">
-        <div>
-          <div className="text-[16px] font-bold text-slate-900 mb-1">{courseName}</div>
-          {courseMeta.total && <div className="text-[12px] text-slate-500 mb-1">{metaLine(courseMeta)}</div>}
-          {teacherText && <div className="text-[12px] text-slate-600">● {teacherText}</div>}
+      <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-5 bg-gradient-to-br from-blue-50 via-white to-indigo-50 border border-blue-100 rounded-2xl px-6 py-5 mb-8 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+        <div className="relative z-10">
+          <div className="text-[20px] font-extrabold mb-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-green-700 drop-shadow-sm">{courseName}</div>
+          {courseMeta.total && <div className="text-[13px] text-slate-500 mb-2 font-medium">{metaLine(courseMeta)}</div>}
+          {teacherText && <div className="text-[13px] text-slate-700 bg-white/60 border border-slate-200/60 inline-block px-2.5 py-1 rounded-md backdrop-blur-sm shadow-sm">
+            <span className="mr-1.5 opacity-80">👨‍🏫</span>{teacherText}
+          </div>}
         </div>
-        <div className="text-right whitespace-nowrap flex-shrink-0">
-          <div className="text-[28px] font-extrabold leading-none" style={{ color: gradeColor(finalGs.grade) }}>
+        <div className="text-right whitespace-nowrap flex-shrink-0 relative z-10 bg-white/60 backdrop-blur-md px-5 py-3 rounded-xl border border-blue-100 shadow-sm">
+          <div className="text-[36px] font-black leading-none drop-shadow-sm" style={{ color: gradeColor(finalGs.grade) }}>
             {finalGs.grade}
           </div>
           {finalGs.score && finalGs.score !== '-' && (
-            <div className="text-[12px] text-slate-400 mt-0.5">{finalGs.score}</div>
+            <div className="text-[14px] font-medium text-slate-500 mt-1">{finalGs.score}</div>
           )}
-          <div className="text-[11px] uppercase tracking-wide text-slate-400 mt-0.5">Final</div>
+          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">Final Grade</div>
         </div>
       </div>
 
       {/* Term cards */}
-      {terms.map((term, i) => <TermCard key={i} term={term} />)}
+      <div className="space-y-2">
+        {terms.map((term, i) => <TermCard key={i} term={term} />)}
+      </div>
     </div>
   );
 }

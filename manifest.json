@@ -86,6 +86,7 @@
       "resources": [
         "aiub.jpg",
         "Academic/CSE.json",
+        "graphs.html",
         "Grade/Graphs.html",
         "Grade/Graphs.css",
         "Grade/Graphs.js",

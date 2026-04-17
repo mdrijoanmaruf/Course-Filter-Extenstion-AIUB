@@ -316,7 +316,7 @@ function NotAttemptedSection({ semSections, electiveRows }) {
 }
 
 function CurriculumGradeReport({ infoItems, semSections, electiveRows, printHref }) {
-  const graphHref = (() => { try { return chrome.runtime.getURL('Grade/Graphs.html'); } catch { return ''; } })();
+  const graphHref = (() => { try { return chrome.runtime.getURL('graphs.html'); } catch { return ''; } })();
 
   return (
     <div className="text-[13px] text-slate-800 py-4 px-1" style={{ boxSizing: 'border-box' }}>

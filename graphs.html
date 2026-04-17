@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIUB Graph Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      body { font-family: 'Poppins', 'Segoe UI', sans-serif; margin: 0; min-height: 100vh;
+        background:
+          radial-gradient(circle at 10% 5%, rgba(14,165,233,0.18) 0 20%, transparent 40%),
+          radial-gradient(circle at 94% 12%, rgba(249,115,22,0.18) 0 22%, transparent 42%),
+          repeating-linear-gradient(135deg, rgba(148,163,184,0.07) 0 8px, transparent 8px 16px),
+          linear-gradient(160deg, #f9fafb 0%, #f0f9ff 50%, #fff7ed 100%);
+      }
+      @keyframes riseIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/grade-graphs.jsx"></script>
+  </body>
+</html>
