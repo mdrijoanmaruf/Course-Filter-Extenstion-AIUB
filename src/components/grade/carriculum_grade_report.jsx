@@ -1,5 +1,198 @@
 import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import '../../content.css';
+
+// ── Inject Tailwind CSS into the page ────────────────────────────────────────
+
+function injectCurriculumStyles() {
+  if (document.getElementById('__aiub_curriculum_styles')) return;
+  
+  const style = document.createElement('style');
+  style.id = '__aiub_curriculum_styles';
+  style.textContent = `
+    /* Backgrounds */
+    .bg-slate-50 { background-color: #f8fafc !important; }
+    .bg-slate-100 { background-color: #f1f5f9 !important; }
+    .bg-slate-200 { background-color: #e2e8f0 !important; }
+    .bg-blue-50 { background-color: #eff6ff !important; }
+    .bg-blue-100 { background-color: #dbeafe !important; }
+    .bg-blue-700 { background-color: #1d4ed8 !important; }
+    .bg-red-50 { background-color: #fef2f2 !important; }
+    .bg-red-100 { background-color: #fee2e2 !important; }
+    .bg-green-50 { background-color: #f0fdf4 !important; }
+    .bg-green-100 { background-color: #dcfce7 !important; }
+    .bg-amber-50 { background-color: #fffbeb !important; }
+    .bg-amber-100 { background-color: #fef3c7 !important; }
+    .bg-sky-50 { background-color: #f0f9ff !important; }
+    .bg-sky-100 { background-color: #e0f2fe !important; }
+    .bg-white { background-color: #ffffff !important; }
+    .bg-yellow-200 { background-color: #fef08a !important; }
+    .bg-white\/25 { background-color: rgba(255, 255, 255, 0.25) !important; }
+    
+    /* Text Colors */
+    .text-slate-300 { color: #cbd5e1 !important; }
+    .text-slate-400 { color: #94a3b8 !important; }
+    .text-slate-500 { color: #64748b !important; }
+    .text-slate-600 { color: #475569 !important; }
+    .text-slate-700 { color: #334155 !important; }
+    .text-slate-800 { color: #1e293b !important; }
+    .text-slate-900 { color: #0f172a !important; }
+    .text-blue-600 { color: #2563eb !important; }
+    .text-blue-700 { color: #1d4ed8 !important; }
+    .text-blue-900 { color: #1e3a8a !important; }
+    .text-red-600 { color: #dc2626 !important; }
+    .text-red-700 { color: #b91c1c !important; }
+    .text-green-600 { color: #16a34a !important; }
+    .text-green-700 { color: #15803d !important; }
+    .text-amber-800 { color: #92400e !important; }
+    .text-amber-900 { color: #78350f !important; }
+    .text-sky-700 { color: #0369a1 !important; }
+    .text-white { color: #ffffff !important; }
+    
+    /* Borders */
+    .border { border-width: 1px !important; border-style: solid !important; }
+    .border-b { border-bottom-width: 1px !important; border-style: solid !important; }
+    .border-l { border-left-width: 1px !important; border-style: solid !important; }
+    .border-b-0 { border-bottom-width: 0 !important; }
+    .border-slate-100 { border-color: #f1f5f9 !important; }
+    .border-slate-200 { border-color: #e2e8f0 !important; }
+    .border-slate-300 { border-color: #cbd5e1 !important; }
+    .border-blue-200 { border-color: #bfdbfe !important; }
+    .border-blue-700 { border-color: #1d4ed8 !important; }
+    .border-yellow-200 { border-color: #fef08a !important; }
+    .border-red-100 { border-color: #fee2e2 !important; }
+    .border-green-200 { border-color: #bbf7d0 !important; }
+    .border-sky-200 { border-color: #bae6fd !important; }
+    .border-collapse { border-collapse: collapse !important; }
+    .border-l-\[3px\] { border-left-width: 3px !important; }
+    
+    /* Borders - specific colors */
+    .border-l-amber-500 { border-left-color: #f59e0b !important; }
+    .border-l-blue-600 { border-left-color: #2563eb !important; }
+    .border-l-green-600 { border-left-color: #16a34a !important; }
+    
+    /* Sizing */
+    .w-full { width: 100% !important; }
+    .w-2\.5 { width: 0.625rem !important; }
+    .h-2\.5 { height: 0.625rem !important; }
+    .min-w-\[150px\] { min-width: 150px !important; }
+    
+    /* Padding & Margin */
+    .p-0 { padding: 0 !important; }
+    .p-1 { padding: 0.25rem !important; }
+    .p-2 { padding: 0.5rem !important; }
+    .p-3 { padding: 0.75rem !important; }
+    .p-4 { padding: 1rem !important; }
+    .p-1\.5 { padding: 0.375rem !important; }
+    .px-1 { padding-left: 0.25rem !important; padding-right: 0.25rem !important; }
+    .px-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+    .px-3 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+    .px-3\.5 { padding-left: 0.875rem !important; padding-right: 0.875rem !important; }
+    .py-0\.5 { padding-top: 0.125rem !important; padding-bottom: 0.125rem !important; }
+    .py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+    .py-1\.5 { padding-top: 0.375rem !important; padding-bottom: 0.375rem !important; }
+    .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+    .py-2\.5 { padding-top: 0.625rem !important; padding-bottom: 0.625rem !important; }
+    .py-3 { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
+    .py-3\.5 { padding-top: 0.875rem !important; padding-bottom: 0.875rem !important; }
+    .py-4 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+    .m-0 { margin: 0 !important; }
+    .mb-1 { margin-bottom: 0.25rem !important; }
+    .mb-1\.5 { margin-bottom: 0.375rem !important; }
+    .mb-2 { margin-bottom: 0.5rem !important; }
+    .mb-3 { margin-bottom: 0.75rem !important; }
+    .mb-4 { margin-bottom: 1rem !important; }
+    .mb-5 { margin-bottom: 1.25rem !important; }
+    .mb-6 { margin-bottom: 1.5rem !important; }
+    .mt-3\.5 { margin-top: 0.875rem !important; }
+    .mt-4 { margin-top: 1rem !important; }
+    .mt-5 { margin-top: 1.25rem !important; }
+    .ml-auto { margin-left: auto !important; }
+    .pb-3 { padding-bottom: 0.75rem !important; }
+    .pt-3 { padding-top: 0.75rem !important; }
+    
+    /* Display & Layout */
+    .flex { display: flex !important; }
+    .inline-flex { display: inline-flex !important; }
+    .inline-block { display: inline-block !important; }
+    .hidden { display: none !important; }
+    .grid { display: grid !important; }
+    .block { display: block !important; }
+    .flex-wrap { flex-wrap: wrap !important; }
+    .items-center { align-items: center !important; }
+    .justify-between { justify-content: space-between !important; }
+    .gap-1 { gap: 0.25rem !important; }
+    .gap-1\.5 { gap: 0.375rem !important; }
+    .gap-2 { gap: 0.5rem !important; }
+    .gap-3 { gap: 0.75rem !important; }
+    .gap-3\.5 { gap: 0.875rem !important; }
+    .gap-4 { gap: 1rem !important; }
+    
+    /* Rounded */
+    .rounded { border-radius: 0.25rem !important; }
+    .rounded-md { border-radius: 0.375rem !important; }
+    .rounded-lg { border-radius: 0.5rem !important; }
+    .rounded-xl { border-radius: 0.75rem !important; }
+    .rounded-full { border-radius: 9999px !important; }
+    
+    /* Font */
+    .font-mono { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace !important; }
+    .font-normal { font-weight: 400 !important; }
+    .font-semibold { font-weight: 600 !important; }
+    .font-bold { font-weight: 700 !important; }
+    .font-extrabold { font-weight: 800 !important; }
+    .uppercase { text-transform: uppercase !important; }
+    .whitespace-nowrap { white-space: nowrap !important; }
+    .leading-relaxed { line-height: 1.625 !important; }
+    .leading-snug { line-height: 1.375 !important; }
+    .leading-tight { line-height: 1.25 !important; }
+    .text-center { text-align: center !important; }
+    .text-left { text-align: left !important; }
+    .no-underline { text-decoration: none !important; }
+    
+    /* Text Size */
+    .text-\[10px\] { font-size: 10px !important; }
+    .text-\[11px\] { font-size: 11px !important; }
+    .text-\[12px\] { font-size: 12px !important; }
+    .text-\[13px\] { font-size: 13px !important; }
+    .text-\[16px\] { font-size: 16px !important; }
+    .text-\[26px\] { font-size: 26px !important; }
+    
+    /* Letter Spacing */
+    .tracking-wide { letter-spacing: 0.025em !important; }
+    .tracking-wider { letter-spacing: 0.05em !important; }
+    
+    /* Other */
+    .cursor-default { cursor: default !important; }
+    .cursor-pointer { cursor: pointer !important; }
+    .outline-none { outline: 2px solid transparent !important; outline-offset: 2px !important; }
+    .transition-all { transition-property: all !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-duration: 150ms !important; }
+    .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important; }
+    .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; }
+    .flex-shrink-0 { flex-shrink: 0 !important; }
+    .hover\\:bg-slate-50:hover { background-color: #f8fafc !important; }
+    .hover\\:bg-blue-50:hover { background-color: #eff6ff !important; }
+    .hover\\:bg-amber-50\/60:hover { background-color: rgba(255, 251, 235, 0.6) !important; }
+    .hover\\:bg-indigo-50:hover { background-color: #eef2ff !important; }
+    .hover\\:bg-sky-100:hover { background-color: #e0f2fe !important; }
+    .hover\\:text-blue-700:hover { color: #1d4ed8 !important; }
+    .hover\\:border-blue-200:hover { border-color: #bfdbfe !important; }
+    .hover\\:border-indigo-300:hover { border-color: #a5d6fd !important; }
+    .hover\\:shadow-md:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; }
+    .last\\:border-b-0:last-child { border-bottom-width: 0 !important; }
+    
+    /* Grid */
+    .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+    
+    /* Overflow */
+    .overflow-hidden { overflow: hidden !important; }
+    
+    /* Vertical Align */
+    .align-middle { vertical-align: middle !important; }
+  `;
+  
+  document.head.appendChild(style);
+}
 
 // ── Constants & helpers ──────────────────────────────────────────────────────
 
@@ -420,6 +613,9 @@ function CurriculumGradeReport({ infoItems, semSections, electiveRows, printHref
       if (!gr) { setTimeout(init, 400); return; }
       if (window.__aiubGradeCurrMounted) return;
       window.__aiubGradeCurrMounted = true;
+
+      // Inject CSS styles into the page
+      injectCurriculumStyles();
 
       const rootPanel = gr.closest('.panel');
       if (rootPanel) {

@@ -15,23 +15,51 @@ function fmtAmt(num) {
 function SummaryCards({ totalDebit, totalCredit, finalBalance }) {
   return (
     <div style={{ boxSizing: 'border-box' }}>
-      <div className="mb-3.5">
-        <div className="text-[22px] font-bold text-slate-900">Financial Details</div>
-        <div className="text-[13px] text-slate-500">Your complete tuition and payment history</div>
+      <div className="mb-6">
+        <h1 className="text-[24px] font-extrabold text-slate-900 m-0 mb-2">
+          Financial <span style={{ background: 'linear-gradient(135deg, #0284c7, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Dashboard</span>
+        </h1>
+        <p className="text-[13px] text-slate-500 m-0">View your tuition charges, payments, and current balance</p>
       </div>
-      <div className="flex gap-3 flex-wrap mb-5">
-        <div className="flex-1 min-w-[150px] bg-white rounded-xl p-3.5 border-[1.5px] border-slate-200 shadow-sm">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1.5">Total Charged</div>
-          <div className="text-[20px] font-bold text-red-600">৳{fmtAmt(totalDebit)}</div>
+      <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+        {/* Total Charged */}
+        <div className="rounded-lg p-4 border transition-all hover:shadow-md" style={{
+          background: 'linear-gradient(135deg, #fee2e2 0%, #fef2f2 100%)',
+          borderColor: '#fecaca',
+          borderWidth: '1px'
+        }}>
+          <div className="text-[11px] font-bold uppercase tracking-wider text-red-700 mb-2">💰 Total Charged</div>
+          <div className="text-[26px] font-extrabold text-red-600">৳{fmtAmt(totalDebit)}</div>
+          <div className="text-[11px] text-red-500 mt-1">Cumulative charges</div>
         </div>
-        <div className="flex-1 min-w-[150px] bg-white rounded-xl p-3.5 border-[1.5px] border-slate-200 shadow-sm">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1.5">Total Paid</div>
-          <div className="text-[20px] font-bold text-green-600">৳{fmtAmt(totalCredit)}</div>
+
+        {/* Total Paid */}
+        <div className="rounded-lg p-4 border transition-all hover:shadow-md" style={{
+          background: 'linear-gradient(135deg, #f0fdf4 0%, #f7fee7 100%)',
+          borderColor: '#dcfce7',
+          borderWidth: '1px'
+        }}>
+          <div className="text-[11px] font-bold uppercase tracking-wider text-green-700 mb-2">✓ Total Paid</div>
+          <div className="text-[26px] font-extrabold text-green-600">৳{fmtAmt(totalCredit)}</div>
+          <div className="text-[11px] text-green-500 mt-1">Payments received</div>
         </div>
-        <div className="flex-1 min-w-[150px] bg-white rounded-xl p-3.5 border-[1.5px] border-slate-200 shadow-sm">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1.5">Balance Due</div>
-          <div className={`text-[20px] font-bold ${finalBalance === 0 ? 'text-green-600' : 'text-amber-600'}`}>
+
+        {/* Balance Due */}
+        <div className="rounded-lg p-4 border transition-all hover:shadow-md" style={{
+          background: finalBalance === 0 
+            ? 'linear-gradient(135deg, #f0fdf4 0%, #f7fee7 100%)'
+            : 'linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%)',
+          borderColor: finalBalance === 0 ? '#dcfce7' : '#fde047',
+          borderWidth: '1px'
+        }}>
+          <div className={`text-[11px] font-bold uppercase tracking-wider mb-2 ${finalBalance === 0 ? 'text-green-700' : 'text-amber-700'}`}>
+            {finalBalance === 0 ? '✓ Balance Clear' : '⚠ Balance Due'}
+          </div>
+          <div className={`text-[26px] font-extrabold ${finalBalance === 0 ? 'text-green-600' : 'text-amber-600'}`}>
             ৳{fmtAmt(finalBalance)}
+          </div>
+          <div className={`text-[11px] mt-1 ${finalBalance === 0 ? 'text-green-500' : 'text-amber-500'}`}>
+            {finalBalance === 0 ? 'No pending balance' : 'Please pay soon'}
           </div>
         </div>
       </div>
@@ -73,7 +101,8 @@ function SummaryCards({ totalDebit, totalCredit, finalBalance }) {
         if (!cells.length) return;
 
         if (cells[0].hasAttribute('colspan')) {
-          row.style.background = '#f1f5f9';
+          row.style.background = 'linear-gradient(to right, #f1f5f9, #e0f2fe)';
+          row.style.fontWeight = '700';
           if (cells.length >= 5) {
             totalDebit   = parseAmount(cells[1].querySelector('label')?.textContent || cells[1].textContent);
             totalCredit  = parseAmount(cells[2].textContent);
@@ -84,41 +113,41 @@ function SummaryCards({ totalDebit, totalCredit, finalBalance }) {
         if (cells.length < 6) return;
 
         const [dateCell, partCell, debitCell, creditCell,,balCell] = cells;
-        dateCell.style.cssText = 'color:#6b7280;white-space:nowrap;font-size:12px;padding:11px 14px;border:none;border-bottom:1px solid #f3f4f6';
-        partCell.style.cssText = 'max-width:280px;padding:11px 14px;border:none;border-bottom:1px solid #f3f4f6;vertical-align:middle';
-        debitCell.style.cssText = 'text-align:right;white-space:nowrap;font-weight:600;padding:11px 14px;border:none;border-bottom:1px solid #f3f4f6';
-        creditCell.style.cssText = 'text-align:right;white-space:nowrap;font-weight:600;padding:11px 14px;border:none;border-bottom:1px solid #f3f4f6';
-        balCell.style.cssText = 'text-align:right;white-space:nowrap;font-weight:700;padding:11px 14px;border:none;border-bottom:1px solid #f3f4f6';
+        dateCell.style.cssText = 'color:#1f2937!important;white-space:nowrap;font-size:13px!important;padding:12px 14px!important;border:none!important;border-bottom:1px solid #e5e7eb!important;background:#fff!important';
+        partCell.style.cssText = 'max-width:320px;padding:12px 14px!important;border:none!important;border-bottom:1px solid #e5e7eb!important;vertical-align:middle;background:#fff!important;color:#1f2937!important';
+        debitCell.style.cssText = 'text-align:right;white-space:nowrap;font-weight:700!important;padding:12px 14px!important;border:none!important;border-bottom:1px solid #e5e7eb!important;font-size:13px!important;background:#fff!important';
+        creditCell.style.cssText = 'text-align:right;white-space:nowrap;font-weight:700!important;padding:12px 14px!important;border:none!important;border-bottom:1px solid #e5e7eb!important;font-size:13px!important;background:#fff!important';
+        balCell.style.cssText = 'text-align:right;white-space:nowrap;font-weight:800!important;padding:12px 14px!important;border:none!important;border-bottom:1px solid #e5e7eb!important;font-size:13px!important;background:#fff!important';
 
         const dAmt = parseAmount(debitCell.textContent);
         const cAmt = parseAmount(creditCell.textContent);
         const bAmt = parseAmount(balCell.textContent);
-        debitCell.style.color = dAmt === 0 ? '#9ca3af' : '#dc2626';
-        creditCell.style.color = cAmt === 0 ? '#9ca3af' : '#059669';
-        balCell.style.color = bAmt === 0 ? '#059669' : '#dc2626';
+        debitCell.style.color = dAmt === 0 ? '#d1d5db' : '#dc2626';
+        creditCell.style.color = cAmt === 0 ? '#d1d5db' : '#16a34a';
+        balCell.style.color = bAmt === 0 ? '#16a34a' : '#ea580c';
 
         const modalLink = partCell.querySelector('a[data-toggle="modal"]');
         if (modalLink) {
-          row.style.background = '#eff6ff';
+          row.style.background = '#f0f9ff!important';
           const badge = document.createElement('span');
-          badge.style.cssText = 'display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;margin-right:7px;background:#dbeafe;color:#1d4ed8;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap';
+          badge.style.cssText = 'display:inline-block;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;margin-right:8px;background:#dbeafe;color:#0284c7;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;border:1px solid #bfdbfe';
           badge.textContent = 'Assessment';
           modalLink.before(badge);
         } else if (partCell.textContent.trim().toLowerCase().includes('semester payment')) {
-          row.style.background = '#f0fdf4';
-          partCell.insertAdjacentHTML('afterbegin', '<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;margin-right:7px;background:#d1fae5;color:#059669;text-transform:uppercase;white-space:nowrap">Payment</span>');
+          row.style.background = '#f0fdf4!important';
+          partCell.insertAdjacentHTML('afterbegin', '<span style="display:inline-block;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;margin-right:8px;background:#d1fae5;color:#059669;text-transform:uppercase;white-space:nowrap;border:1px solid #a7f3d0;letter-spacing:.4px">Payment</span>');
         } else {
-          row.style.background = '#fffbeb';
-          partCell.insertAdjacentHTML('afterbegin', '<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;margin-right:7px;background:#fef3c7;color:#b45309;text-transform:uppercase;white-space:nowrap">Fee</span>');
+          row.style.background = '#fffbeb!important';
+          partCell.insertAdjacentHTML('afterbegin', '<span style="display:inline-block;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;margin-right:8px;background:#fef3c7;color:#b45309;text-transform:uppercase;white-space:nowrap;border:1px solid #fcd34d;letter-spacing:.4px">Fee</span>');
         }
       });
 
       // Style table header
       const thead = table.querySelector('thead');
       if (thead) {
-        thead.style.background = 'linear-gradient(135deg,#1e3a5f 0%,#1d4ed8 100%)';
+        thead.style.background = 'linear-gradient(to right, #f1f5f9 0%, #e0f2fe 100%)';
         thead.querySelectorAll('th').forEach((th) => {
-          th.style.cssText = 'padding:12px 14px;font-weight:600;font-size:11px;color:#fff;text-transform:uppercase;letter-spacing:.5px;border:none;white-space:nowrap';
+          th.style.cssText = 'padding:13px 14px!important;font-weight:700!important;font-size:11px!important;color:#0f172a!important;text-transform:uppercase;letter-spacing:.6px;border:none!important;white-space:nowrap;border-bottom:2px solid #cbd5e1!important;background:inherit!important';
         });
       }
 
@@ -139,24 +168,24 @@ function SummaryCards({ totalDebit, totalCredit, finalBalance }) {
       const modal = document.getElementById('assesmentModal');
       if (modal) {
         const dialog = modal.querySelector('.modal-dialog');
-        if (dialog) dialog.style.cssText = 'max-width:620px;margin:40px auto;border-radius:14px;overflow:hidden';
+        if (dialog) dialog.style.cssText = 'max-width:680px;margin:40px auto;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)';
         const content = modal.querySelector('.modal-content');
-        if (content) content.style.cssText = 'border:none;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.18)';
+        if (content) content.style.cssText = 'border:none;border-radius:16px;box-shadow:none;overflow:hidden';
         const mHeader = modal.querySelector('.modal-header');
-        if (mHeader) mHeader.style.cssText = 'background:linear-gradient(135deg,#1e3a5f 0%,#1d4ed8 100%);border:none;padding:18px 24px;border-radius:14px 14px 0 0';
+        if (mHeader) mHeader.style.cssText = 'background:linear-gradient(135deg, #0f172a 0%, #0284c7 100%);border:none;padding:20px 24px;border-radius:16px 16px 0 0';
         const mTitle = modal.querySelector('.modal-header h4');
-        if (mTitle) mTitle.style.cssText = 'color:#fff;font-weight:700;margin:0;font-size:16px';
+        if (mTitle) mTitle.style.cssText = 'color:#fff;font-weight:700;margin:0;font-size:16px;letter-spacing:.3px';
 
         const divDetails = document.getElementById('divAssessmentDetails');
         if (divDetails) {
           new MutationObserver(() => {
             divDetails.querySelectorAll('table').forEach((t) => {
-              t.style.cssText = 'width:100%!important;border-collapse:collapse!important;font-size:13px';
+              t.style.cssText = 'width:100%!important;border-collapse:collapse!important;font-size:13px;margin-bottom:20px';
               t.querySelectorAll('thead th').forEach((th) => {
-                th.style.cssText = 'padding:10px 12px;font-weight:600;font-size:12px;color:#374151;background:#f1f5f9;border-bottom:2px solid #e2e8f0;text-transform:uppercase;letter-spacing:.4px';
+                th.style.cssText = 'padding:12px 14px;font-weight:700;font-size:12px;color:#1f2937;background:linear-gradient(to right, #f1f5f9, #e0f2fe);border:none;border-bottom:2px solid #cbd5e1;text-transform:uppercase;letter-spacing:.4px';
               });
               t.querySelectorAll('tbody td').forEach((td) => {
-                td.style.cssText = 'padding:9px 12px;border-bottom:1px solid #f3f4f6;color:#374151';
+                td.style.cssText = 'padding:11px 14px;border-bottom:1px solid #e5e7eb;color:#374151;background:#fff';
               });
             });
           }).observe(divDetails, { childList: true, subtree: true });
