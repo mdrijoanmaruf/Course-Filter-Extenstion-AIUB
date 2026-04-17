@@ -1,0 +1,380 @@
+/* ── Keyframes ─────────────────────────────────────────── */
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes borderSpin {
+  0%   { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardReveal {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes shimmerText {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes pulseRing {
+  0%   { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.35); }
+  70%  { box-shadow: 0 0 0 8px rgba(13, 148, 136, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
+}
+
+@keyframes labelPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.07); }
+  100% { transform: scale(1); }
+}
+
+/* ── Section Header ────────────────────────────────────── */
+
+.reghome-section-head {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  margin: 22px 0 14px;
+  padding: 13px 18px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeSlideIn 0.45s ease both;
+
+  /* Glass background */
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(37, 99, 235, 0.25);
+
+  /* Layered shadow for depth */
+  box-shadow:
+    0 2px 12px rgba(37, 99, 235, 0.12),
+    0 0 0 1px rgba(37, 99, 235, 0.07) inset;
+}
+
+/* Animated gradient sweep across the header */
+.reghome-section-head::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(37, 99, 235, 0.08) 40%,
+    rgba(16, 185, 129, 0.14) 60%,
+    transparent 100%
+  );
+  background-size: 250% 100%;
+  animation: gradientShift 3.5s ease infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Left accent bar */
+.reghome-section-head::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 20%; bottom: 20%;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, #2563eb 0%, #10b981 100%);
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+}
+
+.reghome-section-head .head-label {
+  color: #1e40af;
+  position: relative;
+  z-index: 1;
+}
+
+.reghome-section-head span {
+  background: linear-gradient(90deg, #2563eb 0%, #10b981 50%, #2563eb 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerText 2.8s linear infinite;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Registration Panel Wrapper ────────────────────────── */
+
+.reghome-reg-panel {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.reghome-reg-panel > .panel-heading {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin-bottom: 14px !important;
+}
+
+.reghome-reg-panel > .panel-heading .row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin: 0 !important;
+}
+
+.reghome-reg-panel > .panel-heading .col-md-9,
+.reghome-reg-panel > .panel-heading .col-md-3 {
+  width: auto !important;
+  float: none !important;
+  padding: 0 !important;
+}
+
+.reghome-reg-panel > .panel-body { padding: 0 !important; }
+
+/* Semester Dropdown */
+.reghome-reg-panel #SemesterDropDown {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e40af;
+  border: 1.5px solid rgba(37, 99, 235, 0.3) !important;
+  border-radius: 10px !important;
+  padding: 7px 12px !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  box-shadow: 0 1px 6px rgba(37, 99, 235, 0.08) !important;
+}
+
+.reghome-reg-panel #SemesterDropDown:focus {
+  border-color: #2563eb !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* ── Course Cards ───────────────────────────────────────── */
+
+.StudentCourseList .panel.panel-primary {
+  position: relative;
+  border: none !important;
+  border-radius: 12px !important;
+  overflow: visible !important;
+  margin-bottom: 12px !important;
+  animation: cardReveal 0.4s ease both;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Animated spinning gradient border via pseudo-element */
+.StudentCourseList .panel.panel-primary::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 14px;
+  background: linear-gradient(
+    60deg,
+    #2563eb,
+    #3b82f6,
+    #06b6d4,
+    #10b981,
+    #34d399,
+    #2563eb
+  );
+  background-size: 300% 300%;
+  animation: gradientShift 4s ease infinite;
+  z-index: 0;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+/* Inner white card sits on top */
+.StudentCourseList .panel.panel-primary::after {
+  content: '';
+  position: absolute;
+  inset: 1.5px;
+  border-radius: 12px;
+  background: #fff;
+  z-index: 1;
+}
+
+/* Hover: full brightness animated border */
+.StudentCourseList .panel.panel-primary:hover::before {
+  opacity: 1;
+  animation: gradientShift 2s ease infinite;
+}
+
+.StudentCourseList .panel.panel-primary:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+}
+
+/* All card children must sit above the pseudo-elements */
+.StudentCourseList .panel.panel-primary > * {
+  position: relative;
+  z-index: 2;
+}
+
+.StudentCourseList .panel-primary > .panel-heading { display: none !important; }
+
+.StudentCourseList .panel-primary > .panel-body {
+  background: transparent !important;
+  color: #1e293b !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 13px 16px !important;
+  font-size: 13px !important;
+  font-weight: 700;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  border-radius: 12px 12px 0 0;
+}
+
+/* ── Badges / Labels ───────────────────────────────────── */
+
+.StudentCourseList .panel-primary > .panel-body .label-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+  color: #1e40af !important;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 4px 11px;
+  font-size: 11px !important;
+  display: inline-block;
+  margin: 0 !important;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.12);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.StudentCourseList .panel-primary > .panel-body .label-info:hover {
+  transform: scale(1.06);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+.StudentCourseList .panel-primary > .panel-body .label-success {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+  color: #16a34a !important;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 4px 11px;
+  font-size: 11px !important;
+  display: inline-block;
+  margin: 0 !important;
+  border: 1px solid rgba(22, 163, 74, 0.18);
+  box-shadow: 0 1px 4px rgba(22, 163, 74, 0.1);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.StudentCourseList .panel-primary > .panel-body .label-success:hover {
+  transform: scale(1.06);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.22);
+}
+
+.StudentCourseList .panel-primary > .panel-body .label-danger {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+  color: #991b1b !important;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 4px 11px;
+  font-size: 11px !important;
+  display: inline-block;
+  margin: 0 !important;
+  border: 1px solid rgba(153, 27, 27, 0.15);
+  box-shadow: 0 1px 4px rgba(153, 27, 27, 0.1);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.StudentCourseList .panel-primary > .panel-body .label-danger:hover {
+  transform: scale(1.06);
+  box-shadow: 0 2px 8px rgba(153, 27, 27, 0.2);
+}
+
+/* ── Card Footer ────────────────────────────────────────── */
+
+.StudentCourseList .panel-footer {
+  background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%) !important;
+  border-top: 1px solid rgba(37, 99, 235, 0.1) !important;
+  padding: 9px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+  border-radius: 0 0 12px 12px;
+}
+
+.StudentCourseList .panel-footer .fa {
+  color: #2563eb !important;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.StudentCourseList .panel-footer a {
+  color: #2563eb !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  margin: 0 !important;
+  transition: color 0.15s, letter-spacing 0.15s;
+  position: relative;
+}
+
+.StudentCourseList .panel-footer a::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -1px;
+  width: 0; height: 1.5px;
+  background: linear-gradient(90deg, #2563eb, #10b981);
+  border-radius: 2px;
+  transition: width 0.25s ease;
+}
+
+.StudentCourseList .panel-footer a:hover { color: #1e40af !important; letter-spacing: 0.2px; }
+.StudentCourseList .panel-footer a:hover::after { width: 100%; }
+
+/* ── Staggered card animation ───────────────────────────── */
+
+.StudentCourseList .panel.panel-primary:nth-child(1)  { animation-delay: 0.04s; }
+.StudentCourseList .panel.panel-primary:nth-child(2)  { animation-delay: 0.08s; }
+.StudentCourseList .panel.panel-primary:nth-child(3)  { animation-delay: 0.12s; }
+.StudentCourseList .panel.panel-primary:nth-child(4)  { animation-delay: 0.16s; }
+.StudentCourseList .panel.panel-primary:nth-child(5)  { animation-delay: 0.20s; }
+.StudentCourseList .panel.panel-primary:nth-child(6)  { animation-delay: 0.24s; }
+.StudentCourseList .panel.panel-primary:nth-child(7)  { animation-delay: 0.28s; }
+.StudentCourseList .panel.panel-primary:nth-child(8)  { animation-delay: 0.32s; }
+.StudentCourseList .panel.panel-primary:nth-child(9)  { animation-delay: 0.36s; }
+.StudentCourseList .panel.panel-primary:nth-child(10) { animation-delay: 0.40s; }
+
+/* ── Mobile ─────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .reghome-reg-panel > .panel-heading .row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .StudentCourseList .panel-primary > .panel-body {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .reghome-section-head {
+    font-size: 14px;
+    padding: 11px 14px;
+  }
+}
