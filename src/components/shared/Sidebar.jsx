@@ -106,15 +106,6 @@
         const href = new URL(a.href).pathname;
         if (path.startsWith(href) && href !== '/Student') {
           a.classList.add('active', 'aiub-active-item');
-          const collapse = a.closest('.panel-collapse');
-          if (collapse) {
-            collapse.classList.add('in', 'aiub-open-collapse');
-            const trigger = sidebar.querySelector('[href="#' + collapse.id + '"]');
-            if (trigger) {
-              trigger.setAttribute('aria-expanded', 'true');
-              trigger.classList.add('aria-expanded-true', 'aiub-expanded-trigger');
-            }
-          }
         }
       } catch (_) {}
     });

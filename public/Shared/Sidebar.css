@@ -8,9 +8,9 @@
   margin-bottom: 0 !important;
   border-radius: 12px !important;
   overflow: hidden !important;
-  border: 1px solid #e5e7eb !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03) !important;
-  background: #fafbfc !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  background: linear-gradient(180deg, #f8fafc 0%, #e0e7ff 100%) !important;
 }
 #navigation-bar .panel-group .panel {
   border: none !important;
@@ -18,7 +18,7 @@
   box-shadow: none !important;
   margin-bottom: 0 !important;
   background: transparent !important;
-  border-bottom: 1px solid #f3f4f6 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 #navigation-bar .panel-group .panel:last-child {
   border-bottom: none !important;
@@ -59,14 +59,14 @@
 }
 
 #navigation-bar .panel-heading a:hover {
-  background: #f0f4f8 !important;
-  color: #2563eb !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #1d4ed8 !important;
 }
 
 #navigation-bar .panel-heading a[aria-expanded="true"],
 #navigation-bar .panel-heading a.aria-expanded-true {
-  background: #eff6ff !important;
-  color: #1e40af !important;
+  background: rgba(37, 99, 235, 0.15) !important;
+  color: #1e3a8a !important;
 }
 
 #navigation-bar .panel-heading a[aria-expanded="true"]::before,
@@ -136,8 +136,8 @@
 }
 
 #navigation-bar .list-group-item:hover {
-  background: #f3f4f6 !important;
-  color: #1f2937 !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  color: #1e3a8a !important;
   padding-left: 16px !important;
 }
 
