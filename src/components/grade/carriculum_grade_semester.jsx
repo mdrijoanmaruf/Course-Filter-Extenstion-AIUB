@@ -211,24 +211,25 @@ function SemesterCard({ sem }) {
   return (
     <div className={`rounded-xl overflow-hidden mb-3 border ${borderColor}`} style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
       <div
-        className="flex justify-between items-center px-4 py-3 cursor-pointer select-none bg-white hover:bg-slate-50"
+        className="flex justify-between items-center px-4 py-3 cursor-pointer select-none transition-all"
+        style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)', boxShadow: '0 2px 8px rgba(99, 102, 241, 0.15)' }}
         onClick={() => setOpen((v) => !v)}
       >
         <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dotColor}`} />
-          <span className="text-[14px] font-semibold text-slate-900">{sem.label}</span>
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isActive ? 'bg-yellow-300' : 'bg-white/40'}`} />
+          <span className="text-[14px] font-bold text-white">{sem.label}</span>
           {isActive && (
-            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-violet-100 text-violet-700">Current</span>
+            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-yellow-300 text-indigo-900">Current</span>
           )}
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[12px] text-slate-400">{sem.courses.length} course{sem.courses.length !== 1 ? 's' : ''}</span>
+          <span className="text-[12px] text-white/80">{sem.courses.length} course{sem.courses.length !== 1 ? 's' : ''}</span>
           {sem.summary?.gpa && sem.summary.gpa !== '0.00' && (
-            <span className="text-[12px] font-semibold" style={{ color: gpaColor(sem.summary.gpa) }}>
+            <span className="text-[12px] font-semibold text-white/90">
               GPA {sem.summary.gpa}
             </span>
           )}
-          <span className={`text-[10px] text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}>▼</span>
+          <span className={`text-[10px] text-white/70 transition-transform ${open ? 'rotate-180' : ''}`}>▼</span>
         </div>
       </div>
 
@@ -276,18 +277,26 @@ function SemesterCard({ sem }) {
 
 function InfoGrid({ items }) {
   const isCgpa = (k) => /^cgpa$/i.test(k.replace(/\s/g, ''));
+  const getCardColor = (k) => {
+    if (isCgpa(k)) return '#3b82f6';
+    if (/^student\s*id$/i.test(k.replace(/\s/g, ''))) return '#10b981';
+    return '#6366f1';
+  };
   return (
-    <div className="grid gap-2 mb-5" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-      {items.map(({ k, v }) => (
-        <div key={k} className="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl hover:border-blue-200 hover:shadow-sm transition-all">
-          <div className="text-[10px] uppercase tracking-wide text-slate-400 font-semibold mb-0.5">{k}</div>
-          {isCgpa(k) ? (
-            <div className="text-[26px] font-extrabold leading-tight" style={{ color: gpaColor(v) }}>{v || '—'}</div>
-          ) : (
-            <div className="text-[13px] font-medium text-slate-900">{v || '—'}</div>
-          )}
-        </div>
-      ))}
+    <div className="grid gap-3 mb-6" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+      {items.map(({ k, v }) => {
+        const color = getCardColor(k);
+        return (
+          <div key={k} className="px-4 py-4 rounded-xl bg-white border-2 hover:shadow-md transition-all cursor-default" style={{ borderColor: color }}>
+            <div className="text-[10px] uppercase tracking-wider font-bold mb-2" style={{ color }}>{k}</div>
+            {isCgpa(k) ? (
+              <div className="text-[28px] font-extrabold text-green-700 leading-tight">{v || '—'}</div>
+            ) : (
+              <div className="text-[13px] font-semibold text-slate-700">{v || '—'}</div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -295,15 +304,16 @@ function InfoGrid({ items }) {
 function SemesterGradeReport({ infoItems, semesters, printHref, graphHref }) {
   return (
     <div className="text-[13px] text-slate-800 px-1 py-4" style={{ fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',Roboto,sans-serif" }}>
-      <div className="flex items-center justify-between mb-4 pb-3.5 border-b-2 border-slate-100">
-        <h2 className="text-[16px] font-bold text-slate-900 m-0">
-          Semester <span className="text-blue-600">Grade Report</span>
+      <div className="flex items-center justify-between mb-6 pb-4 rounded-lg p-4" style={{ background: 'linear-gradient(135deg, #3b82f6, #1e3a8a)' }}>
+        <h2 className="text-[22px] font-extrabold text-white m-0">
+          Semester <span style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Grade Report</span>
         </h2>
         <div className="flex items-center gap-2">
           {printHref && (
             <a
               href={printHref}
-              className="text-[11px] font-semibold text-slate-500 no-underline border border-slate-300 rounded-md px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 hover:text-blue-700 hover:border-indigo-300 transition-colors"
+              className="text-[11px] font-bold text-white rounded-lg px-4 py-2 no-underline transition-all hover:shadow-lg"
+              style={{ background: 'linear-gradient(135deg, #ec4899, #f43f5e)' }}
             >
               🖨 Print
             </a>
@@ -311,7 +321,8 @@ function SemesterGradeReport({ infoItems, semesters, printHref, graphHref }) {
           {graphHref && (
             <a
               href={graphHref}
-              className="text-[11px] font-semibold text-sky-600 no-underline border border-sky-200 rounded-md px-3 py-1.5 bg-sky-50 hover:bg-sky-100 hover:border-sky-300 transition-colors"
+              className="text-[11px] font-bold text-white rounded-lg px-4 py-2 no-underline transition-all hover:shadow-lg"
+              style={{ background: 'linear-gradient(135deg, #06b6d4, #0284c7)' }}
             >
               📊 Graph
             </a>
