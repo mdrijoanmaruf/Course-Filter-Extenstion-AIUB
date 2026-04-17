@@ -1,0 +1,101 @@
+{
+  "manifest_version": 3,
+  "name": "AIUB Portal+",
+  "short_name": "AIUB+",
+  "description": "Comprehensive enhancement suite for the AIUB Student Portal — advanced course filtering, clash detection, grade visualization, smart schedule display, and UI improvements across all portal pages.",
+  "version": "2.0.0",
+  "permissions": ["activeTab", "storage", "tabs"],
+  "host_permissions": ["https://portal.aiub.edu/*"],
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "aiub.jpg",
+      "48": "aiub.jpg",
+      "128": "aiub.jpg"
+    }
+  },
+  "icons": {
+    "16": "aiub.jpg",
+    "48": "aiub.jpg",
+    "128": "aiub.jpg"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://portal.aiub.edu/Student*"],
+      "js": ["src/components/entries/sharedBridge.content.jsx"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://portal.aiub.edu/Student*"],
+      "js": ["src/components/entries/sharedSidebar.content.jsx"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://portal.aiub.edu/Student",
+        "https://portal.aiub.edu/Student/",
+        "https://portal.aiub.edu/Student/Home/*"
+      ],
+      "js": ["src/components/entries/homeBundle.content.jsx"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://portal.aiub.edu/Student/Section/Offered*"],
+      "js": ["src/components/entries/offeredFilters.content.jsx"],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://portal.aiub.edu/Student/Course?*"],
+      "js": ["src/components/entries/academicCourseResults.content.jsx"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://portal.aiub.edu/Student/Registration?*"],
+      "js": ["src/components/entries/academicRegistration.content.jsx"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://portal.aiub.edu/Student/Curriculum*"],
+      "js": ["src/components/entries/academicCurriculum.content.jsx"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://portal.aiub.edu/Student/Accounts*"],
+      "js": ["src/components/entries/academicFinancials.content.jsx"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://portal.aiub.edu/Student/Adrop/DropApplication*"],
+      "js": ["src/components/entries/academicDropApplication.content.jsx"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://portal.aiub.edu/Student/GradeReport/ByCurriculum*"],
+      "js": ["src/components/entries/gradeCurriculum.content.jsx"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://portal.aiub.edu/Student/GradeReport/BySemester*"],
+      "js": ["src/components/entries/gradeSemester.content.jsx"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "aiub.jpg",
+        "Academic/CSE.json",
+        "Grade/Graphs.html",
+        "Grade/Graphs.css",
+        "Grade/Graphs.js",
+        "Grade/chart.umd.js",
+        "Grade/carriculum_grade_report.css",
+        "Grade/carriculum_grade_semester.css",
+        "Shared/Sidebar.css",
+        "Shared/Navbar.css"
+      ],
+      "matches": ["https://portal.aiub.edu/*"]
+    }
+  ]
+}
