@@ -328,39 +328,6 @@ function addLockInfo(semSections, electiveRows) {
   });
 }
 
-function saveGraphData(infoItems, semSections, electiveRows) {
-  if (!chrome.storage?.local) return;
-  const coreRows = semSections.flatMap((s) => s.rows);
-  const sumCredit = (rows, pred) => rows.filter(pred).reduce((s, r) => s + parseCreditValue(r.credit), 0);
-  const payload = {
-    studentName: getInfoValue(infoItems, ['Name', 'Student Name']),
-    studentId: getInfoValue(infoItems, ['Id', 'Student Id']),
-    program: getInfoValue(infoItems, ['Program', 'Department']),
-    cgpa: extractNumber(getInfoValue(infoItems, ['Cgpa', 'CGPA'])),
-    totalCredits: coreRows.reduce((s, r) => s + parseCreditValue(r.credit), 0),
-    totalCourses: coreRows.length,
-    stateCredits: {
-      completed: sumCredit(coreRows, (r) => r.state === 'done'),
-      ongoing: sumCredit(coreRows, (r) => r.state === 'ong'),
-      withdrawn: sumCredit(coreRows, (r) => r.state === 'wdn'),
-      notAttempted: sumCredit(coreRows, (r) => r.state === 'nd'),
-    },
-    stateCounts: {
-      completed: coreRows.filter((r) => r.state === 'done').length,
-      ongoing: coreRows.filter((r) => r.state === 'ong').length,
-      withdrawn: coreRows.filter((r) => r.state === 'wdn').length,
-      notAttempted: coreRows.filter((r) => r.state === 'nd').length,
-    },
-    capturedAt: new Date().toISOString(),
-  };
-  chrome.storage.local.get({ aiubGraphData: {} }, (res) => {
-    const next = Object.assign({}, res.aiubGraphData || {});
-    next.curriculum = payload;
-    next.updatedAt = new Date().toISOString();
-    chrome.storage.local.set({ aiubGraphData: next });
-  });
-}
-
 // ── React components ─────────────────────────────────────────────────────────
 
 function GradePill({ grades }) {
@@ -625,8 +592,7 @@ function NotAttemptedSection({ semSections, electiveRows }) {
 }
 
 function CurriculumGradeReport({ infoItems, semSections, electiveRows, printHref }) {
-  const graphHref = (() => { try { return chrome.runtime.getURL('graphs.html'); } catch { return ''; } })();
-
+  
   return (
     <div className="text-[13px] text-slate-800 py-4 px-1" style={{ boxSizing: 'border-box' }}>
       {/* Header */}
@@ -640,11 +606,7 @@ function CurriculumGradeReport({ infoItems, semSections, electiveRows, printHref
               🖨 Print
             </a>
           )}
-          {graphHref && (
-            <a href={graphHref} className="text-[11px] font-bold text-white rounded-lg px-4 py-2 no-underline transition-all hover:shadow-lg" style={{ background: 'linear-gradient(135deg, #06b6d4, #0284c7)' }}>
-              📊 Graph
-            </a>
-          )}
+          
         </div>
       </div>
 
@@ -779,8 +741,6 @@ function CurriculumGradeReport({ infoItems, semSections, electiveRows, printHref
       }
 
       addLockInfo(semSections, electiveRows);
-      saveGraphData(infoItems || [], semSections, electiveRows);
-
       gr.innerHTML = '';
       const container = document.createElement('div');
       gr.appendChild(container);

@@ -101,52 +101,6 @@ function parseSemesters(tbl) {
   return sems;
 }
 
-function saveGraphData(infoItems, semesters) {
-  if (!chrome.storage?.local) return;
-  chrome.storage.local.get({ aiubGraphData: {} }, (res) => {
-    const next = { ...res.aiubGraphData };
-    const curriculum = next.curriculum || {};
-    const coreCodeSet = new Set((curriculum.coreCourseCodes || []).map(normCode));
-    const coreNameSet = new Set((curriculum.coreCourseNames || []).map(normText));
-    const hasCoreMap = coreCodeSet.size > 0 || coreNameSet.size > 0;
-
-    const isCore = (c) => !hasCoreMap || coreCodeSet.has(normCode(c.classId)) || coreNameSet.has(normText(c.name));
-    const filtered = semesters.map((sem) => ({ ...sem, courses: sem.courses.filter(isCore) }));
-    const allCourses = filtered.flatMap((s) => s.courses);
-    const sumCr = (pred) => allCourses.filter(pred).reduce((s, c) => s + c.creditValue, 0);
-
-    next.semester = {
-      studentName: getInfoValue(infoItems, ['Name', 'Student Name']),
-      studentId: getInfoValue(infoItems, ['Id', 'Student Id']),
-      program: getInfoValue(infoItems, ['Program', 'Department']),
-      latestCgpa: extractNumber(getInfoValue(infoItems, ['Cgpa', 'CGPA'])),
-      totalCredits: allCourses.reduce((s, c) => s + c.creditValue, 0),
-      totalCourses: allCourses.length,
-      passFail: {
-        passed: allCourses.filter((c) => c.state === 'done').length,
-        ongoing: allCourses.filter((c) => c.state === 'ong').length,
-        dropped: allCourses.filter((c) => c.state === 'wdn').length,
-        failed: allCourses.filter((c) => c.state === 'fail').length,
-      },
-      passFailCredits: {
-        passed: sumCr((c) => c.state === 'done'),
-        ongoing: sumCr((c) => c.state === 'ong'),
-        dropped: sumCr((c) => c.state === 'wdn'),
-        failed: sumCr((c) => c.state === 'fail'),
-      },
-      semesterGpaTrend: filtered.map((s) => ({ label: s.label, gpa: extractNumber(s.summary?.gpa) })).filter((p) => p.gpa > 0),
-      cgpaTrend: filtered.map((s) => ({ label: s.label, cgpa: extractNumber(s.summary?.cgpa) })).filter((p) => p.cgpa > 0),
-      creditBySemester: filtered.map((s) => ({
-        label: s.label,
-        credits: s.courses.filter((c) => c.state === 'done').reduce((sum, c) => sum + c.creditValue, 0),
-      })).filter((p) => p.credits > 0),
-      capturedAt: new Date().toISOString(),
-    };
-    next.updatedAt = new Date().toISOString();
-    chrome.storage.local.set({ aiubGraphData: next });
-  });
-}
-
 // ── Sub-components ───────────────────────────────────────────────────────────
 
 function GradePill({ grade }) {
@@ -301,7 +255,7 @@ function InfoGrid({ items }) {
   );
 }
 
-function SemesterGradeReport({ infoItems, semesters, printHref, graphHref }) {
+function SemesterGradeReport({ infoItems, semesters, printHref }) {
   return (
     <div className="text-[13px] text-slate-800 px-1 py-4" style={{ fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',Roboto,sans-serif" }}>
       <div className="flex items-center justify-between mb-6 pb-4 rounded-lg p-4" style={{ background: 'linear-gradient(135deg, #3b82f6, #1e3a8a)' }}>
@@ -316,15 +270,6 @@ function SemesterGradeReport({ infoItems, semesters, printHref, graphHref }) {
               style={{ background: 'linear-gradient(135deg, #ec4899, #f43f5e)' }}
             >
               🖨 Print
-            </a>
-          )}
-          {graphHref && (
-            <a
-              href={graphHref}
-              className="text-[11px] font-bold text-white rounded-lg px-4 py-2 no-underline transition-all hover:shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #06b6d4, #0284c7)' }}
-            >
-              📊 Graph
             </a>
           )}
         </div>
@@ -380,12 +325,9 @@ function SemesterGradeReport({ infoItems, semesters, printHref, graphHref }) {
 
       const printLink = document.querySelector('a[href*="PrintGradeReport"]');
       const printHref = printLink?.getAttribute('href') || null;
-      let graphHref = '';
-      try { graphHref = chrome.runtime.getURL('Grade/Graphs.html'); } catch (_) {}
 
       const infoItems = parseInfo(tables[0]);
       const semesters = parseSemesters(tables[1]);
-      saveGraphData(infoItems, semesters);
 
       gr.innerHTML = '';
       createRoot(gr).render(
@@ -393,7 +335,6 @@ function SemesterGradeReport({ infoItems, semesters, printHref, graphHref }) {
           infoItems={infoItems}
           semesters={semesters}
           printHref={printHref}
-          graphHref={graphHref}
         />
       );
     }

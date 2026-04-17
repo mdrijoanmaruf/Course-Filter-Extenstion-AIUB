@@ -86,11 +86,6 @@
       "resources": [
         "aiub.jpg",
         "Academic/CSE.json",
-        "graphs.html",
-        "Grade/Graphs.html",
-        "Grade/Graphs.css",
-        "Grade/Graphs.js",
-        "Grade/chart.umd.js",
         "Shared/Sidebar.css"
       ],
       "matches": ["https://portal.aiub.edu/*"]
