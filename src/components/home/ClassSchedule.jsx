@@ -173,14 +173,14 @@ function ClassTimer({ startTs, endTs }) {
 }
 
 function ClassCard({ cls, isToday }) {
-  // Soft gradient backgrounds per card type
+  // Sidebar-aligned gradient palette per card type
   const cardBg = isToday
-    ? 'linear-gradient(145deg, #eff6ff 0%, #e0f2fe 50%, #f0fdf4 100%)'
-    : 'linear-gradient(145deg, #f8fafc 0%, #f0f9ff 50%, #f0fdf4 100%)';
+    ? 'linear-gradient(180deg, #f8fbff 0%, #e0e7ff 100%)'
+    : 'linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)';
   const accentBar = isToday
-    ? 'linear-gradient(90deg, #6366f1, #0ea5e9, #06b6d4)'
-    : 'linear-gradient(90deg, #94a3b8, #64748b)';
-  const borderColor = isToday ? '#bfdbfe' : '#e2e8f0';
+    ? 'linear-gradient(90deg, #1e3a8a, #2563eb)'
+    : 'linear-gradient(90deg, #2563eb, #60a5fa)';
+  const borderColor = isToday ? '#bfdbfe' : '#dbeafe';
 
   return (
     <div style={{
@@ -191,10 +191,10 @@ function ClassCard({ cls, isToday }) {
       background: cardBg,
       overflow: 'hidden',
       transition: 'box-shadow 0.2s, transform 0.2s',
-      boxShadow: isToday ? '0 4px 16px rgba(99,102,241,0.10)' : '0 2px 8px rgba(100,116,139,0.07)',
+      boxShadow: isToday ? '0 6px 18px rgba(37, 99, 235, 0.14)' : '0 3px 10px rgba(37, 99, 235, 0.09)',
     }}
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(14,165,233,0.15)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = isToday ? '0 4px 16px rgba(99,102,241,0.10)' : '0 2px 8px rgba(100,116,139,0.07)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = isToday ? '0 6px 18px rgba(37, 99, 235, 0.14)' : '0 3px 10px rgba(37, 99, 235, 0.09)'; }}
     >
       {/* Top accent bar */}
       <div style={{ height: 3, background: accentBar }} />
@@ -207,7 +207,7 @@ function ClassCard({ cls, isToday }) {
             display: 'block',
             fontWeight: 700,
             fontSize: 14,
-            color: isToday ? '#1e3a5f' : '#1e293b',
+            color: isToday ? '#1e3a8a' : '#1e293b',
             textDecoration: 'none',
             marginBottom: 12,
             lineHeight: 1.4,
@@ -221,10 +221,10 @@ function ClassCard({ cls, isToday }) {
         {cls.time && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
-              <circle cx="8" cy="8" r="6.5" stroke="#60a5fa" strokeWidth="1.5"/>
-              <path d="M8 4.5V8l2.5 1.5" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round"/>
+              <circle cx="8" cy="8" r="6.5" stroke="#2563eb" strokeWidth="1.5"/>
+              <path d="M8 4.5V8l2.5 1.5" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
-            <span style={{ fontSize: 12.5, fontWeight: 600, color: '#334155' }}>{cls.time}</span>
+            <span style={{ fontSize: 12.5, fontWeight: 600, color: '#1e3a8a' }}>{cls.time}</span>
           </div>
         )}
 
@@ -232,10 +232,10 @@ function ClassCard({ cls, isToday }) {
         {cls.room && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
-              <path d="M8 1.5C5.515 1.5 3.5 3.515 3.5 6c0 3.75 4.5 8.5 4.5 8.5s4.5-4.75 4.5-8.5C12.5 3.515 10.485 1.5 8 1.5z" stroke="#a78bfa" strokeWidth="1.5"/>
-              <circle cx="8" cy="6" r="1.5" stroke="#a78bfa" strokeWidth="1.2"/>
+              <path d="M8 1.5C5.515 1.5 3.5 3.515 3.5 6c0 3.75 4.5 8.5 4.5 8.5s4.5-4.75 4.5-8.5C12.5 3.515 10.485 1.5 8 1.5z" stroke="#2563eb" strokeWidth="1.5"/>
+              <circle cx="8" cy="6" r="1.5" stroke="#2563eb" strokeWidth="1.2"/>
             </svg>
-            <span style={{ fontSize: 12, fontWeight: 500, color: '#475569' }}>{cls.room}</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: '#334155' }}>{cls.room}</span>
           </div>
         )}
 
