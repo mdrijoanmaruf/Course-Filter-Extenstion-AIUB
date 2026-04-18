@@ -12,13 +12,10 @@ function getDateForLabel(text) {
     return d;
   }
   const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
-  // "DD-Mon-YYYY"
   const m1 = text.match(/(\d{1,2})-(\w{3})-(\d{4})/);
   if (m1) return new Date(parseInt(m1[3]), months[m1[2]], parseInt(m1[1]));
-  // "DD Mon YYYY" or "Mon DD, YYYY"
   const m2 = text.match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/);
   if (m2) return new Date(parseInt(m2[3]), months[m2[2]], parseInt(m2[1]));
-  // Day-name only (Sun/Mon/…/Sat) — find the next matching weekday from today
   const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
   const idx = dayNames.findIndex((d) => text.toLowerCase().startsWith(d));
   if (idx !== -1) {
@@ -31,8 +28,6 @@ function getDateForLabel(text) {
 }
 
 function parseTimePart(str) {
-  // Accepts "DayName H:M AM/PM", "H:MM AM/PM", or "H:M" (single-digit minutes like "1:0 PM")
-  // The optional (?:[a-zA-Z]+\s+)? handles a leading day-name prefix gracefully.
   const m = str.trim().match(/(?:[a-zA-Z]+\s+)?(\d{1,2}):(\d{1,2})\s*(AM|PM)?/i);
   if (!m) return null;
   let h = parseInt(m[1]);
@@ -120,26 +115,57 @@ function ClassTimer({ startTs, endTs }) {
 
   if (now >= endTs) {
     return (
-      <div className="mt-2.5 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100/80 w-fit">
-        <span className="w-2 h-2 rounded-full bg-slate-400 inline-block flex-shrink-0" />
-        <span className="text-[11px] font-bold text-slate-400 tracking-wide">Class Ended</span>
+      <div style={{
+        marginTop: '10px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '4px 10px',
+        borderRadius: '20px',
+        background: '#f1f5f9',
+        border: '1px solid #e2e8f0',
+      }}>
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#94a3b8', display: 'inline-block', flexShrink: 0 }} />
+        <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', letterSpacing: '0.04em' }}>Class ended</span>
       </div>
     );
   }
   if (now >= startTs) {
     return (
-      <div className="mt-2.5 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg w-fit" style={{ background: 'rgba(22,163,74,0.12)' }}>
-        <span className="w-2 h-2 rounded-full bg-green-500 inline-block flex-shrink-0 animate-pulse" />
-        <span className="text-[11px] font-bold text-green-700 tracking-wide">
-          In Progress &nbsp;·&nbsp; {fmtDuration(endTs - now)} left
+      <div style={{
+        marginTop: '10px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '4px 10px',
+        borderRadius: '20px',
+        background: '#dcfce7',
+        border: '1px solid #bbf7d0',
+      }}>
+        <span style={{
+          width: 7, height: 7, borderRadius: '50%', background: '#22c55e',
+          display: 'inline-block', flexShrink: 0,
+          animation: 'pulse 1.5s infinite',
+        }} />
+        <span style={{ fontSize: 11, fontWeight: 600, color: '#15803d', letterSpacing: '0.04em' }}>
+          In progress · {fmtDuration(endTs - now)} left
         </span>
       </div>
     );
   }
   return (
-    <div className="mt-2.5 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg w-fit" style={{ background: 'rgba(2,132,199,0.10)' }}>
-      <span className="w-2 h-2 rounded-full bg-blue-500 inline-block flex-shrink-0" />
-      <span className="text-[11px] font-bold text-blue-700 tracking-wide">
+    <div style={{
+      marginTop: '10px',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '6px',
+      padding: '4px 10px',
+      borderRadius: '20px',
+      background: '#eff6ff',
+      border: '1px solid #bfdbfe',
+    }}>
+      <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#3b82f6', display: 'inline-block', flexShrink: 0 }} />
+      <span style={{ fontSize: 11, fontWeight: 600, color: '#1d4ed8', letterSpacing: '0.04em' }}>
         Starts in {fmtDuration(startTs - now)}
       </span>
     </div>
@@ -147,44 +173,69 @@ function ClassTimer({ startTs, endTs }) {
 }
 
 function ClassCard({ cls, isToday }) {
-  const cardStyle = isToday
-    ? { background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 60%, #e0f2fe 100%)', borderColor: '#93c5fd' }
-    : { background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 60%, #f0fdf4 100%)', borderColor: '#bae6fd' };
+  // Soft gradient backgrounds per card type
+  const cardBg = isToday
+    ? 'linear-gradient(145deg, #eff6ff 0%, #e0f2fe 50%, #f0fdf4 100%)'
+    : 'linear-gradient(145deg, #f8fafc 0%, #f0f9ff 50%, #f0fdf4 100%)';
+  const accentBar = isToday
+    ? 'linear-gradient(90deg, #6366f1, #0ea5e9, #06b6d4)'
+    : 'linear-gradient(90deg, #94a3b8, #64748b)';
+  const borderColor = isToday ? '#bfdbfe' : '#e2e8f0';
 
   return (
-    <div
-      className="flex-1 min-w-[230px] max-w-sm rounded-2xl border p-0 overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5"
-      style={{ ...cardStyle, boxShadow: '0 2px 8px rgba(2,132,199,0.08)' }}
+    <div style={{
+      flex: '1 1 220px',
+      maxWidth: '320px',
+      borderRadius: '14px',
+      border: `1.5px solid ${borderColor}`,
+      background: cardBg,
+      overflow: 'hidden',
+      transition: 'box-shadow 0.2s, transform 0.2s',
+      boxShadow: isToday ? '0 4px 16px rgba(99,102,241,0.10)' : '0 2px 8px rgba(100,116,139,0.07)',
+    }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(14,165,233,0.15)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = isToday ? '0 4px 16px rgba(99,102,241,0.10)' : '0 2px 8px rgba(100,116,139,0.07)'; }}
     >
       {/* Top accent bar */}
-      <div
-        className="h-1 w-full"
-        style={{ background: isToday ? 'linear-gradient(90deg,#0284c7,#06b6d4,#6366f1)' : 'linear-gradient(90deg,#38bdf8,#06b6d4)' }}
-      />
+      <div style={{ height: 3, background: accentBar }} />
 
-      <div className="p-3.5">
+      <div style={{ padding: '14px 16px 16px' }}>
         {/* Course name */}
         <a
           href={cls.href.startsWith('/') ? cls.href : '#'}
-          className="block font-extrabold text-[13px] text-slate-800 hover:text-blue-700 mb-2.5 leading-snug"
-          style={{ textDecoration: 'none' }}
+          style={{
+            display: 'block',
+            fontWeight: 700,
+            fontSize: 14,
+            color: isToday ? '#1e3a5f' : '#1e293b',
+            textDecoration: 'none',
+            marginBottom: 12,
+            lineHeight: 1.4,
+            letterSpacing: '-0.01em',
+          }}
         >
           {cls.name}
         </a>
 
         {/* Time */}
         {cls.time && (
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-blue-400 text-[12px]">🕐</span>
-            <span className="text-[12px] font-semibold text-slate-600">{cls.time}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+              <circle cx="8" cy="8" r="6.5" stroke="#60a5fa" strokeWidth="1.5"/>
+              <path d="M8 4.5V8l2.5 1.5" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            <span style={{ fontSize: 12.5, fontWeight: 600, color: '#334155' }}>{cls.time}</span>
           </div>
         )}
 
         {/* Room */}
         {cls.room && (
-          <div className="flex items-center gap-1.5">
-            <span className="text-[12px]">📍</span>
-            <span className="text-[11.5px] font-medium text-slate-500">{cls.room}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+              <path d="M8 1.5C5.515 1.5 3.5 3.515 3.5 6c0 3.75 4.5 8.5 4.5 8.5s4.5-4.75 4.5-8.5C12.5 3.515 10.485 1.5 8 1.5z" stroke="#a78bfa" strokeWidth="1.5"/>
+              <circle cx="8" cy="6" r="1.5" stroke="#a78bfa" strokeWidth="1.2"/>
+            </svg>
+            <span style={{ fontSize: 12, fontWeight: 500, color: '#475569' }}>{cls.room}</span>
           </div>
         )}
 
@@ -196,45 +247,92 @@ function ClassCard({ cls, isToday }) {
 }
 
 function DaySection({ day }) {
-  const isToday = day.isToday;
-  const isTomorrow = day.isTomorrow;
+  const { isToday, isTomorrow } = day;
+
+  // Dot color for day label
+  const dotColor = isToday ? '#6366f1' : isTomorrow ? '#8b5cf6' : '#94a3b8';
+  const labelColor = isToday ? '#1e3a5f' : isTomorrow ? '#3b0764' : '#374151';
+  const labelSize = 17; // larger text as requested
 
   return (
-    <div className={`mb-5 rounded-2xl overflow-hidden ${isToday ? 'ring-2 ring-blue-300 ring-offset-1' : ''}`}
-      style={isToday ? { boxShadow: '0 4px 16px rgba(2,132,199,0.13)' } : {}}>
+    <div style={{
+      marginBottom: 22,
+      borderRadius: 16,
+      overflow: 'hidden',
+      border: isToday ? '1.5px solid #c7d2fe' : '1.5px solid #e2e8f0',
+      boxShadow: isToday ? '0 4px 20px rgba(99,102,241,0.08)' : '0 2px 8px rgba(0,0,0,0.04)',
+    }}>
 
-      {/* Day header */}
-      <div
-        className="px-4 py-2.5 flex items-center gap-3"
-        style={
-          isToday
-            ? { background: 'linear-gradient(90deg,#0284c7 0%,#0ea5e9 60%,#06b6d4 100%)' }
-            : isTomorrow
-            ? { background: 'linear-gradient(90deg,#7c3aed,#8b5cf6)' }
-            : { background: 'linear-gradient(90deg,#64748b,#94a3b8)' }
-        }
-      >
-        {isToday && <span className="text-[14px]">📅</span>}
-        <span className="text-[12px] font-extrabold text-white uppercase tracking-widest">
+      {/* Day header — no bg color, just a clean bottom border */}
+      <div style={{
+        padding: '14px 18px 12px',
+        background: 'transparent',
+        borderBottom: `1.5px solid ${isToday ? '#e0e7ff' : '#f1f5f9'}`,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+      }}>
+        {/* Dot accent */}
+        <span style={{
+          width: 9,
+          height: 9,
+          borderRadius: '50%',
+          background: dotColor,
+          display: 'inline-block',
+          flexShrink: 0,
+        }} />
+
+        {/* Day label — larger, colored text, no bg */}
+        <span style={{
+          fontSize: labelSize,
+          fontWeight: 700,
+          color: labelColor,
+          letterSpacing: '0.01em',
+          textTransform: 'capitalize',
+          flex: 1,
+        }}>
           {day.label}
         </span>
+
+        {/* Today / Tomorrow badge — subtle pill only */}
         {isToday && (
-          <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white border border-white/30">
-            TODAY
-          </span>
+          <span style={{
+            fontSize: 11,
+            fontWeight: 700,
+            padding: '3px 10px',
+            borderRadius: 20,
+            background: '#eef2ff',
+            color: '#4f46e5',
+            border: '1px solid #c7d2fe',
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+          }}>Today</span>
         )}
         {isTomorrow && (
-          <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white border border-white/30">
-            TOMORROW
-          </span>
+          <span style={{
+            fontSize: 11,
+            fontWeight: 700,
+            padding: '3px 10px',
+            borderRadius: 20,
+            background: '#f5f3ff',
+            color: '#7c3aed',
+            border: '1px solid #ddd6fe',
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+          }}>Tomorrow</span>
         )}
       </div>
 
-      {/* Cards */}
-      <div
-        className="p-3 flex flex-wrap gap-2.5"
-        style={isToday ? { background: 'rgba(239,246,255,0.6)' } : { background: 'rgba(248,250,252,0.6)' }}
-      >
+      {/* Cards area — soft gradient bg */}
+      <div style={{
+        padding: '14px 16px 16px',
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 12,
+        background: isToday
+          ? 'linear-gradient(160deg, #f8faff 0%, #f0f4ff 100%)'
+          : 'linear-gradient(160deg, #fafafa 0%, #f8fafc 100%)',
+      }}>
         {day.classes.map((cls, j) => (
           <ClassCard key={j} cls={cls} isToday={isToday} />
         ))}
@@ -247,24 +345,37 @@ function ScheduleView({ days }) {
   const totalClasses = days.reduce((s, d) => s + d.classes.length, 0);
 
   return (
-    <div>
+    <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       {/* Section title */}
-      <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-slate-100">
-        <div className="flex items-center gap-2">
-          <span className="text-[18px]">🗓️</span>
-          <h3 className="text-[17px] font-extrabold text-slate-900 leading-tight m-0">
-            Class{' '}
-            <span style={{
-              background: 'linear-gradient(135deg,#0284c7,#06b6d4)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}>
-              Schedule
-            </span>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 20,
+        paddingBottom: 14,
+        borderBottom: '2px solid #f1f5f9',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="4" width="18" height="17" rx="3" stroke="#6366f1" strokeWidth="1.7"/>
+            <path d="M3 9h18" stroke="#6366f1" strokeWidth="1.5"/>
+            <path d="M8 2v4M16 2v4" stroke="#6366f1" strokeWidth="1.5" strokeLinecap="round"/>
+            <rect x="7" y="13" width="3" height="3" rx="0.5" fill="#6366f1"/>
+            <rect x="14" y="13" width="3" height="3" rx="0.5" fill="#a5b4fc"/>
+          </svg>
+          <h3 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>
+            Class Schedule
           </h3>
         </div>
-        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+        <span style={{
+          fontSize: 12,
+          fontWeight: 700,
+          padding: '4px 12px',
+          borderRadius: 20,
+          background: '#eff6ff',
+          color: '#1d4ed8',
+          border: '1px solid #bfdbfe',
+        }}>
           {totalClasses} {totalClasses === 1 ? 'class' : 'classes'}
         </span>
       </div>
