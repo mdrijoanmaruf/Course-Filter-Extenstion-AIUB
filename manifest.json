@@ -79,6 +79,11 @@
       "matches": ["https://portal.aiub.edu/Student/GradeReport/BySemester*"],
       "js": ["src/components/entries/gradeSemester.content.jsx"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://portal.aiub.edu/Student/Home/Profile*"],
+      "js": ["src/components/entries/profileContent.content.jsx"],
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
