@@ -20,12 +20,9 @@ function DropView({ pct, angularNode, rulesNode }) {
     <div className="text-[13px] text-slate-800" style={{ boxSizing: 'border-box' }}>
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6 pb-4" style={{ borderBottom: '1px solid #e2e8f0' }}>
-        <div className="flex flex-col">
-          <h2 className="text-[18px] font-bold text-slate-900 tracking-tight m-0">
-            Course <span style={{ background: 'linear-gradient(135deg, #0284c7, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Drop</span>
-          </h2>
-          <p className="text-[12px] text-slate-500 m-0 mt-0.5">Request to drop courses with real-time refund information</p>
-        </div>
+        <h2 className="text-[18px] font-bold text-slate-900 tracking-tight m-0">
+          Course <span style={{ background: 'linear-gradient(135deg, #e11d48, #f43f5e)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Drop</span>
+        </h2>
       </div>
 
       {/* Grid Layout */}
@@ -33,25 +30,30 @@ function DropView({ pct, angularNode, rulesNode }) {
         {/* Main Column for Angular List and Rules */}
         <div className="flex flex-col gap-3 min-w-0" ref={mainRef}></div>
 
-        {/* Side Panel for Status Info */}
-        <div 
-          className="border rounded-lg overflow-hidden shadow-md" 
-          style={{ 
-            position: 'sticky', 
-            top: 16, 
+        {/* Side Panel — mirrors Fee panel in Registration */}
+        <div
+          className="border rounded-lg overflow-hidden shadow-md"
+          style={{
+            position: 'sticky',
+            top: 16,
+            alignSelf: 'start',
             backgroundColor: '#f8fafc',
             borderColor: '#cbd5e1',
-            borderWidth: '1px'
+            borderWidth: '1px',
           }}
         >
-          <div 
+          <div
             className="px-3.5 py-2.5 text-[11px] font-bold uppercase tracking-wider text-white"
-            style={{ 
-              background: isGood ? 'linear-gradient(to right, #16a34a, #15803d)' : 'linear-gradient(to right, #e11d48, #be123c)'
+            style={{
+              background: isGood
+                ? 'linear-gradient(to right, #16a34a, #15803d)'
+                : 'linear-gradient(to right, #e11d48, #be123c)',
+              borderBottom: '1px solid #cbd5e1',
             }}
           >
             💰 Refund Status
           </div>
+
           <div className="p-5 flex flex-col items-center justify-center bg-white" style={{ borderBottom: '1px solid #e2e8f0' }}>
             <span className="text-[36px] font-extrabold leading-none mb-2" style={{ color: isGood ? '#166534' : '#991b1b' }}>
               {pct}
@@ -60,13 +62,19 @@ function DropView({ pct, angularNode, rulesNode }) {
               {isGood ? '✓ Eligible' : '✗ Not Eligible'}
             </span>
           </div>
-          <div className="p-4 bg-slate-50">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-              ℹ️ Important Notice
+
+          <div className="py-1">
+            <div className="flex items-center justify-between px-3.5 py-2 gap-2">
+              <span className="text-[12px] text-slate-600">Refund %</span>
+              <span className={`font-mono text-[13px] font-bold whitespace-nowrap ${isGood ? 'text-green-600' : 'text-rose-600'}`}>{pct}</span>
             </div>
-            <p className="text-[11px] text-slate-500 m-0 leading-relaxed">
-              Verify refund deadlines before submitting. Drops may affect your credit limit and financial status.
-            </p>
+            <div className="h-px bg-slate-200 my-1" />
+            <div className="flex items-start gap-2 px-3.5 py-2.5">
+              <span className="text-slate-400 text-[12px] mt-0.5">ℹ</span>
+              <p className="text-[11px] text-slate-500 m-0 leading-relaxed">
+                Verify refund deadlines before submitting. Drops may affect your credit limit and financial status.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -101,8 +109,11 @@ function DropView({ pct, angularNode, rulesNode }) {
         #Rules .table td{font-size:12px!important;padding:9px 14px!important;color:#475569!important;border-color:#f1f5f9!important}
         #Rules .table tbody tr:hover{background:#f8fafc!important}
         [ng-controller="DropApplicationController2"] .ng-scope>[ng-repeat]{display:none!important}
-        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope{background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;margin-bottom:12px!important;padding:0!important;overflow:hidden;transition:all .2s ease;box-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05)}
-        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope:hover{box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);border-color:#bae6fd;transform:translateY(-1px)}
+        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope{background:linear-gradient(135deg,#f8fbff 0%,#eff6ff 50%,#dbeafe 100%);border:1px solid #bfdbfe;border-radius:8px;margin-bottom:12px!important;padding:0!important;overflow:hidden;transition:all .2s ease;box-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05)}
+        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope:hover{box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);border-color:#93c5fd;transform:translateY(-1px)}
+        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope:has(.col-md-2 span.ng-binding:not(.ng-hide)){background:linear-gradient(135deg,#fff8f8 0%,#fff1f2 50%,#ffe4e6 100%)!important;border-color:#fecdd3!important}
+        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope:has(.col-md-2 span.ng-binding:not(.ng-hide)):hover{border-color:#fca5a5!important}
+        [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope:has(.col-md-2 span.ng-binding:not(.ng-hide)) .col-md-6>span[style*="slateblue"]{text-decoration:line-through!important;color:#94a3b8!important}
         [ng-controller="DropApplicationController2"] [ng-repeat].ng-scope>.row{margin:0!important;padding:12px 14px!important;align-items:flex-start;display:flex!important;gap:12px}
         [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-1{flex:0 0 auto!important;padding:0!important;width:auto!important}
         [ng-controller="DropApplicationController2"] [ng-repeat] .col-md-6{flex:1 1 auto!important;padding:0!important;min-width:0}
@@ -120,7 +131,7 @@ function DropView({ pct, angularNode, rulesNode }) {
         [ng-controller="DropApplicationController2"] h5.text-center{font-size:14px!important;font-weight:700!important;color:#1e293b!important;margin:12px 0!important}
         [ng-controller="DropApplicationController2"] .table-condensed th{font-size:11px!important;text-transform:uppercase;letter-spacing:.6px;color:#64748b!important;background:linear-gradient(to right, #f8fafc, #f1f5f9)!important;border-bottom:1px solid #e2e8f0!important;padding:10px 12px!important;font-weight:700!important}
         [ng-controller="DropApplicationController2"] .table-condensed td{font-size:12px!important;padding:9px 12px!important;color:#475569!important;border-color:#f1f5f9!important}
-        [ng-controller="DropApplicationController2"] .table-condensed tbody tr:hover{background:#f8fafc!important}
+        [ng-controller="DropApplicationController2"] .table-condensed tbody tr:hover{background:#eff6ff!important}
       `;
       document.head.appendChild(style);
 
