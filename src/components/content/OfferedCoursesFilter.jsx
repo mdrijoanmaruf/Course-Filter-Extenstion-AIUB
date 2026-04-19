@@ -224,6 +224,163 @@ function GhostBtn({ onClick, children }) {
   );
 }
 
+// ── Routine Modal ─────────────────────────────────────────────────────────────
+
+function RoutineModal({ selected, onClose }) {
+  const DAY_ORDER = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  const activeDays = DAY_ORDER.filter(day =>
+    selected.some(c => c.timeSlots.some(ts => ts.day === day))
+  );
+
+  let minTime = Infinity, maxTime = -Infinity;
+  selected.forEach(c => {
+    c.timeSlots.forEach(ts => {
+      const s = timeToMinutes(ts.startTime);
+      const e = timeToMinutes(ts.endTime);
+      if (s !== null) minTime = Math.min(minTime, s);
+      if (e !== null) maxTime = Math.max(maxTime, e);
+    });
+  });
+  if (!isFinite(minTime)) minTime = 8 * 60;
+  if (!isFinite(maxTime)) maxTime = 18 * 60;
+  minTime = Math.floor(minTime / 30) * 30;
+  maxTime = Math.ceil(maxTime / 30) * 30;
+
+  const timeSlots = [];
+  for (let t = minTime; t < maxTime; t += 30) timeSlots.push(t);
+
+  function fmtTime(mins) {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    const ap = h >= 12 ? 'PM' : 'AM';
+    const h12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    return `${h12}:${String(m).padStart(2, '0')} ${ap}`;
+  }
+
+  // Build render plan: for each day, map timeSlot -> { course, slot, span } | 'skip' | null
+  const plan = {};
+  activeDays.forEach(day => {
+    plan[day] = {};
+    const skipSet = new Set();
+    timeSlots.forEach(t => {
+      if (skipSet.has(t)) { plan[day][t] = 'skip'; return; }
+      let found = null;
+      for (const c of selected) {
+        for (const ts of c.timeSlots) {
+          if (ts.day !== day) continue;
+          const start = timeToMinutes(ts.startTime);
+          const end   = timeToMinutes(ts.endTime);
+          if (start === null || end === null) continue;
+          if (start >= t && start < t + 30) { found = { course: c, slot: ts, start, end }; break; }
+        }
+        if (found) break;
+      }
+      if (found) {
+        const span = Math.ceil((found.end - t) / 30);
+        plan[day][t] = { course: found.course, slot: found.slot, span };
+        for (let i = 1; i < span; i++) skipSet.add(t + i * 30);
+      } else {
+        plan[day][t] = null;
+      }
+    });
+  });
+
+  const ROW_H = 52;
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(15,23,42,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
+      <div style={{ background: '#fff', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.35)', width: '100%', maxWidth: '960px', maxHeight: '92vh', display: 'flex', flexDirection: 'column', fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',Roboto,sans-serif" }}>
+
+        {/* Header */}
+        <div style={{ background: GRAD.blue, padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ color: '#fff', fontWeight: 800, fontSize: '15px' }}>📅 Weekly Routine</span>
+            <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 10px', borderRadius: '999px', background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)', border: '1px solid rgba(255,255,255,0.25)' }}>
+              {selected.length} course{selected.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <button onClick={onClose}
+            style={{ background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', color: '#fff', borderRadius: '8px', padding: '5px 14px', fontSize: '12px', cursor: 'pointer', fontWeight: 700 }}>
+            ✕ Close
+          </button>
+        </div>
+
+        {/* Table */}
+        <div style={{ overflowY: 'auto', overflowX: 'auto', flex: 1 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', minWidth: `${80 + activeDays.length * 130}px` }}>
+            <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
+              <tr style={{ background: GRAD.sky }}>
+                <th style={{ width: '80px', padding: '10px 8px', fontSize: '10px', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '2px solid #bfdbfe', borderRight: '1px solid #bfdbfe', textAlign: 'center' }}>
+                  Time
+                </th>
+                {activeDays.map(day => (
+                  <th key={day} style={{ padding: '10px 8px', fontSize: '11px', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '2px solid #bfdbfe', borderRight: '1px solid #e0f2fe', textAlign: 'center' }}>
+                    {day}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {timeSlots.map((t, ti) => (
+                <tr key={t}>
+                  {/* Time label */}
+                  <td style={{ padding: '4px 8px', fontSize: '11px', fontWeight: 700, color: '#0284c7', background: 'linear-gradient(to right,#f0f9ff,#e0f2fe)', borderRight: '1px solid #bfdbfe', borderBottom: '1px solid #e0f2fe', whiteSpace: 'nowrap', verticalAlign: 'middle', textAlign: 'center', height: `${ROW_H}px` }}>
+                    <div>{fmtTime(t)}</div>
+                    <div style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 400, marginTop: '1px' }}>–{fmtTime(t + 30)}</div>
+                  </td>
+
+                  {/* Day cells */}
+                  {activeDays.map(day => {
+                    const cell = plan[day][t];
+                    if (cell === 'skip') return null;
+                    if (!cell) return (
+                      <td key={day} style={{ height: `${ROW_H}px`, borderRight: '1px solid #f0f9ff', borderBottom: '1px solid #f0f9ff', background: ti % 2 === 0 ? '#fafcff' : '#fff' }} />
+                    );
+                    const col = courseColor(cell.course.title);
+                    const innerH = cell.span * ROW_H - 10;
+                    return (
+                      <td key={day} rowSpan={cell.span}
+                        style={{ padding: '5px', borderRight: '1px solid #e0f2fe', borderBottom: '1px solid #e0f2fe', verticalAlign: 'top' }}>
+                        <div style={{ background: `linear-gradient(135deg,${col.border}15,${col.border}28)`, borderLeft: `3px solid ${col.border}`, borderRadius: '7px', padding: '6px 8px', minHeight: `${innerH}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2px' }}>
+                          <div style={{ fontSize: '11px', fontWeight: 800, color: '#1e293b', lineHeight: 1.3 }}>{cell.course.title}</div>
+                          <div style={{ fontSize: '9px', fontWeight: 600, color: col.border, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{cell.slot.classType}</div>
+                          <div style={{ fontSize: '9px', color: '#64748b' }}>{cell.slot.startTime}–{cell.slot.endTime}</div>
+                          {cell.slot.room && (
+                            <div style={{ fontSize: '9px', fontFamily: 'ui-monospace,monospace', fontWeight: 700, color: '#fff', background: col.border, borderRadius: '4px', padding: '1px 5px', alignSelf: 'flex-start', marginTop: '2px' }}>
+                              {cell.slot.room}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Legend */}
+        <div style={{ padding: '10px 16px', background: 'linear-gradient(to right,#f0f9ff,#eff6ff)', borderTop: '1px solid #bfdbfe', display: 'flex', flexWrap: 'wrap', gap: '8px', flexShrink: 0 }}>
+          {selected.map(sec => {
+            const col = courseColor(sec.title);
+            return (
+              <div key={sec.classId} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: col.border, flexShrink: 0 }} />
+                <span style={{ fontSize: '11px', fontWeight: 600, color: '#334155' }}>{sec.title}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function OfferedCoursesFilter({ allCourses, statuses, originalPanel }) {
@@ -237,6 +394,7 @@ export default function OfferedCoursesFilter({ allCourses, statuses, originalPan
   const [page,    setPage]    = useState(1);
   const [perPage, setPerPage] = useState(25);
   const [selected, setSelected] = useState(() => loadSaved(allCourses));
+  const [showRoutine, setShowRoutine] = useState(false);
 
   // Restore linked sections on mount
   useEffect(() => {
@@ -453,12 +611,12 @@ export default function OfferedCoursesFilter({ allCourses, statuses, originalPan
                     <span className="text-[10px] font-extrabold uppercase tracking-widest" style={{ color: '#0284c7' }}>{label}</span>
                     <div className="flex gap-1 items-center">
                       <select value={h} onChange={e => { setH(e.target.value); setPage(1); }}
-                        style={{ minWidth: '70px', padding: '6px 8px', fontSize: '12px', border: '1.5px solid #bfdbfe', borderRadius: '8px', background: '#fff', color: '#1e40af', fontWeight: 600, outline: 'none' }}>
+                        style={{ minWidth: '70px', padding: '6px 8px', fontSize: '12px', border: 'none', borderRadius: '8px', background: '#fff', color: '#1e40af', fontWeight: 600, outline: 'none' }}>
                         <option value="">Hr</option>
                         {[8,9,10,11,12,13,14,15,16,17,18].map(v => <option key={v} value={v}>{v < 12 ? `${v} AM` : v === 12 ? '12 PM' : `${v-12} PM`}</option>)}
                       </select>
                       <select value={m} onChange={e => { setM(e.target.value); setPage(1); }}
-                        style={{ minWidth: '62px', padding: '6px 8px', fontSize: '12px', border: '1.5px solid #bfdbfe', borderRadius: '8px', background: '#fff', color: '#1e40af', fontWeight: 600, outline: 'none' }}>
+                        style={{ minWidth: '62px', padding: '6px 8px', fontSize: '12px', border: 'none', borderRadius: '8px', background: '#fff', color: '#1e40af', fontWeight: 600, outline: 'none' }}>
                         {[0,10,20,30,40,50].map(v => <option key={v} value={v}>{`:${String(v).padStart(2,'0')}`}</option>)}
                       </select>
                     </div>
@@ -478,9 +636,10 @@ export default function OfferedCoursesFilter({ allCourses, statuses, originalPan
             title="📋 Selected Courses"
             badge={`${selected.length} course${selected.length !== 1 ? 's' : ''}`}
             action={
-              <GhostBtn onClick={() => { setSelected([]); localStorage.removeItem('aiub_selectedSections'); }}>
-                ✕ Clear All
-              </GhostBtn>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <GhostBtn onClick={() => setShowRoutine(true)}>📅 Show Routine</GhostBtn>
+                <GhostBtn onClick={() => { setSelected([]); localStorage.removeItem('aiub_selectedSections'); }}>✕ Clear All</GhostBtn>
+              </div>
             }
           />
           <div className="p-4" style={{ background: GRAD.bodyBg }}>
@@ -490,6 +649,8 @@ export default function OfferedCoursesFilter({ allCourses, statuses, originalPan
           </div>
         </div>
       )}
+
+      {showRoutine && <RoutineModal selected={selected} onClose={() => setShowRoutine(false)} />}
 
       {/* ══ Results Table ═════════════════════════════════════════════════════ */}
       {filtered.length > 0 && (
@@ -501,7 +662,7 @@ export default function OfferedCoursesFilter({ allCourses, statuses, originalPan
             <div className="flex items-center gap-2 text-[12px] font-semibold text-sky-700">
               Show
               <select value={perPage} onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }}
-                style={{ padding: '3px 8px', fontSize: '12px', border: '1.5px solid #bfdbfe', borderRadius: '6px', background: '#fff', color: '#1e40af', fontWeight: 600 }}>
+                style={{ padding: '3px 8px', fontSize: '12px', border: 'none', borderRadius: '6px', background: '#fff', color: '#1e40af', fontWeight: 600 }}>
                 {[10, 25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
               </select>
               per page
