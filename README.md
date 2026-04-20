@@ -337,6 +337,7 @@ Bundled curriculum dataset used for prerequisite matching and curriculum enrichm
 - Some enhancements rely on exact portal CSS classes and structure
 - `build:popup` / `watch:popup` scripts are stale without their config file
 - Type usage is mostly JSX/JavaScript; only limited TSX usage in the profile module
+- Unlocked course will work only for AIUB CSE student for now
 
 ---
 
